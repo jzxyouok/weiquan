@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>海上维权巡航安全保障综合信息服务系统</title>
+    <script src="/assets/js/jquery-2.0.3.min.js"></script>
+    <script src="/assets/js/jquery.1.10.2.min.js"></script>
+</head>
+<body>
+
+<script>
+    //alert(qwe);
+    $(function(){
+        $('button').click(function(){
+            window.parent.changeIfarme('new');
+        })
+        $('#test1').height($(window.parent).height());
+    })
+</script>
+<style>
+    #test1 {
+        width: 100%;
+        height: 100%;
+        margin:0px;
+        padding:0px;
+    }
+</style>
+<div id="test1"></div>
+<button>切换</button>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>海上维权巡航安全保障综合信息服务系统</title>
+</head>
+<body>
+<script src="/assets/js/jquery-2.0.3.min.js"></script>
+<script src="/assets/js/jquery-1.10.2.min.js"></script>
+<style type="text/css">
+    iframe{
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        position: absolute;
+        top:0;
+        left: 0;
+        border: none;
+    }
+
+    iframe[src='/new']{
+        z-index: 2000;
+        overflow: hidden;
+    }
+    iframe[src='http://16.69.0.205:8880/Map/Map.aspx']{
+        z-index: 1000;
+        overflow: hidden;
+    }
+</style>
+<script type="text/javascript">
+    function changeIfarme(f){
+//        console.log(f);
+        console.log(123);
+        if (f=='select'){
+            $("iframe[src='/new']").css('z-index',1000);
+            $("iframe[src='http://16.69.0.205:8880/Map/Map.aspx']").css('z-index',2000);
+        }else{
+            $("iframe[src='/new']").css('z-index',2000);
+            $("iframe[src='http://16.69.0.205:8880/Map/Map.aspx']").css('z-index',1000);
+        }
+    }
+
+</script>
+<iframe src="/new" class="iframe"></iframe>
+<!--<iframe src="http://16.69.0.205:8880/Map/Map.aspx"></iframe>-->
+</body>
+<script>
+    $(document).ready(function(){
+        console.log("removeclass");
+        $("iframe").removeClass("k-webkit");
+        $("iframe").removeClass("k-webkit48");
+    });
+</script>
+</html>
+

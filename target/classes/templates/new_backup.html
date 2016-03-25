@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <title>海上维权巡航安全保障综合信息服务系统</title>
+    <meta name="keywords" content=""/>
+    <meta name="description" content=""/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <link rel="stylesheet" href="/css/kendo.bootstrap.min.css"/>
+    <link rel="stylesheet" href="/css/kendo.common.min.css"/>
+
+    <link rel="stylesheet" href="http://localhost:8080/arcgis_js_api/library/3.14/3.14/esri/css/esri.css"/>
+    <link rel="stylesheet" href="http://localhost:8080/arcgis_js_api/library/3.14/3.14/dijit/themes/claro/claro.css">
+   
+    <link rel="stylesheet" type="text/css" href="/assets/css/ace.min.css"/>
+    <link rel="stylesheet" type="text/css" href="/css/jquery-ui.css"/>
+    <!--<link href="/assets/css/bootstrap.min.css" rel="stylesheet"/>-->
+    <link rel="stylesheet" href="/assets/css/font-awesome.min.css"/>
+   <!-- <link rel="stylesheet" href="/assets/css/jquery-ui-1.10.3.custom.min.css"/>
+    <link rel="stylesheet" href="/assets/css/jquery.gritter.css"/>
+    <link rel="stylesheet" href="/assets/css/ace-rtl.min.css"/>
+    <link rel="stylesheet" href="/assets/css/ace-skins.min.css"/>-->
+
+    <link rel="stylesheet" type="text/css" href="/css/header.css"/>
+    <link rel="stylesheet" type="text/css" href="/css/main.css"/>
+    <link rel="stylesheet" type="text/css" href="/css/app.css"/>
+    <link rel="stylesheet" type="text/css" href="/assets/css/ace.min.css"/>
+
+
+</head>
+<body class="claro" >
+<div style="height:100%" id="map1">
+<!--header-->
+    <div id="header" class="app-header navbar">
+    <div class="nav">
+        <!--left-->
+        <div style="background:url('img/Head/top-left.png') no-repeat;width:80%;height:80px;"></div>
+        <!--middle-->
+        <div style="background:url('img/Head/top-mid.png');position: absolute;margin-left: 627px;width: 80%;height: 80px;top:0"></div>
+        <!--right-->
+        <div style="background:url('img/Head/top_right.png') no-repeat;position: absolute;margin-left: 1032px;width: 248px;height: 31px;top: 49px;">
+            <!--time-->
+            <div style="position:absolute;color: white;width: 120px;height: 100%;margin-top: -40px;margin-left: 80px;">
+                <label>2015-12-26  星期六</label>
+            </div>
+           
+            <!--zoom-->
+            <div style="position:absolute; margin-left:80px;">
+                <!--zommIn-->
+                <img src="img/Head/qt_11.png" style="margin-top: 7px;position: absolute;margin-left: -25px;" />
+                <a id="zoomIn" href="javascript:void(0);" style="color:#000000;text-decoration:none;outline:none">
+                    <span>放大</span>
+                </a>
+                <!--zoomOut-->
+                <img src="img/Head/qt_13.png" style="margin-top: 7px;position: absolute;margin-left: 25px;" />
+                <a id="zoomOut" href="javascript:void(0);" style="color:#000000;text-decoration:none;outline:none;position: initial;margin-left: 45px;">
+                    <span>缩小</span>
+                </a>
+                <!--zoomOut-->
+                <img src="img/Head/qt_15.png" style="margin-top: 7px;position: absolute;margin-left: 10px;" />
+                <a id="measure" href="javascript:void(0);" style="color:#000000;text-decoration:none;outline:none;position: initial;margin-left: 35px;">
+                    <span>量算</span>
+                </a>
+
+            </div>
+        </div>
+        <div>
+            <!--导航条-->
+            <ul class="nav-main">
+                <li id="li-1">海洋预报<span></span></li>
+                <li id="li-2">台风专题<span></span></li>
+                <li id="li-3">海洋观测<span></span></li>
+                <li id="li-4">辅助决策<span></span></li>
+                <li>返回首页</li>
+            </ul>
+        </div>
+        <!--隐藏盒子-->
+        <div id="box-1" class="hidden-box1 hidden-loc-index">
+            <ul>
+                <li>海浪</li>
+                <li>风</li>
+                <li>海浪警报</li>
+                <li>航线预报</li>
+            </ul>
+        </div>
+        <div id="box-2" class="hidden-box1 hidden-loc-us">
+            <ul>
+                <li>台风信息</li>
+            </ul>
+        </div>
+        <div id="box-3" class="hidden-box1 hidden-loc-info">
+            <ul>
+                <li>实况数据</li>
+                <li>传输状态</li>
+            </ul>
+        </div>
+        <div id="box-4" class="hidden-box1 hidden-loc-info box04">
+            <ul>
+                <li onclick="actBox()">天气图展示</li>
+                <li>大风大浪预警</li>
+                <li>台风警报</li>
+                <li onclick="showup()">航线规划</li>
+                <li onclick="addDate()">航迹展示 </li>
+            </ul>
+        </div>
+</div>
+    <!-- /.container -->
+</div>
+    <div id="main-container" >
+        <div id="mapDiv"  class="map"></div>
+    </div>
+    <!--大风大浪预警-->
+<div class="ace-settings-container" id="ace-settings-container" style="z-index: 100;">
+    <div class="btn btn-app btn-xs btn-primary ace-settings-btn" id="ace-settings-btn">
+        <i class="icon-globe bigger-150"></i>
+    </div>
+
+    <div class="ace-settings-box " id="ace-settings-box" style="width: 800px;height: 550px;border-color: #1d6fa6">
+        <div class="panel-heading" style="font-size: 19px;padding: 0;letter-spacing: 2px;font-weight: bolder;">
+            <i class="icon-lightbulb"></i>&nbsp;&nbsp;地面天气预警
+        </div>
+        <div>
+            <table >
+                <tr>
+                    <td >
+                        <li class="li-style-type"style="height: 35px;margin-top: 15px">
+                            要素名称：
+                            <input  id="elementName"  style="display:inline-block;" onchange="changeList()"/>
+
+                        </li>
+                        <li class="li-style-type"style="height: 35px">
+                            发布机构：
+                            <input id="institutionName" style="display:inline-block; " onchange="changeList()"/>
+                        </li>
+                        <li class="li-style-type" style="display: inline-block;">
+                            发布时间：
+                            <input type="text" id="releaseDateInput" style="width: 120px" placeholder="请选择时间..." >&nbsp;
+
+                            <input  id="releaseTimeInput"style="width: 25px" >时
+                        </li>
+                        <li class="li-style-type"style="margin-top: 20px">
+                            <div style=" width: 250px;height: 350px;border-width:2px">
+                                <div id="dataTreeView" style="width: 250px;height: 350px"></div>
+                            </div>
+                        </li>
+                    </td>
+                    <td >
+                        <div class="demo-section k-content wide"style="padding-left: 10px">
+                            <div id="listView"></div>
+                            <div id="pager" class="k-pager-wrap"></div>
+                        </div>
+                        <script type="text/x-kendo-template" id="template">
+                            <div class="product">
+                                <img id ="src" src="http://localhost:8080/#:url#" alt="#:picName# " />
+                                <h3>#:picName#</h3>
+                            </div>
+                        </script>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div></div>
+    <!--大风大浪预警end-->
+    <div class="widget-box" id="widget" style="display:none;float:right;position:absolute; left:0px; top:78px;width:346px;">
+        <div class="widget-header" id="widget-header">
+            <label style="text-align:center;">航线规划</label>
+            <div class="widget-toolbar">
+                    <!-- <a href="#" data-action="reload">
+                        <i class="icon-refresh"></i>
+                    </a>
+                    <a href="#" data-action="">
+                        <i class="icon-chevron-up"></i>
+                    </a> -->
+                    <a href="#" onclick="showup()">
+                        <i class="icon-remove"></i>
+                    </a>
+                </div>
+        </div>
+            <div style="font-size: 15px;">
+                <label>航速：&nbsp;&nbsp;&nbsp;</label>
+                <input id="iceArea" /><label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;千米/时</label>
+            </div>
+            <div style="font-size: 15px;margin-top: 9px;height:30px">
+                <label>选择时间：</label>
+                <input id="datepicker" class="datepicker" />
+               <span class="input-group-addon">
+                     <i class="icon-calendar"></i>
+                </span>
+            </div>
+            <div style="position:relative;margin-top:10px">
+                <button id="polyline" class="btn btn-success" type="button">航线规划</button>
+                <button id="stop" class="btn btn-success" type="button">禁用规划</button>
+                <button id="clear" class="btn btn-success" type="button">清除航线</button>
+                <button class="btn btn-success" onclick="play()">航行</button>
+            </div>
+    </div>
+    <!--第二个弹窗-->
+    <div>
+         <div class="widget-box" id="widget1"style="display:none;float:right;position:absolute; left:0px; top:257px;width:346px;">
+         <div class="widget-header" id="widget-header">
+            <label style="text-align:center;">航迹展示</label>
+            <div class="widget-toolbar">
+                <!-- <div class="progress progress-mini progress-striped active" style="width:100px;" data-percent="61%">
+                     <div class="progress-bar progress-bar-danger" style="width:61%"></div>
+                 </div>
+                  --> <a href="#" onclick="addDate()">
+                        <i class="icon-remove"></i>
+                    </a>
+            </div>
+         </div>
+                <form action="/upload" class="dropzone dz-clickable">
+                    <div class="dz-default dz-message " id="text1">
+                        <span>
+                            <span class="smaller-40 bolder">
+                                <i class="icon-caret-right red"></i> 上传文件
+                            </span>
+                            <span class="smaller-80 grey"></span>
+                             <i class="upload-icon icon-cloud-upload blue icon-1x"></i>
+                         </span>
+                       
+                    </div>
+                </form>
+                  <button id="btnAddUsa" class="btn btn-success"  data-path="/js/data/testData2.json">添加航线数据</button>
+                    
+                    <button class="btn btn-success" onclick="play()">航行</button>
+                    <button class="btn btn-success" onclick="">暂停</button>
+         </div> 
+    </div>
+    <div class="widget-box transparent" style="float:right;position:absolute; right:346px; top:78px;">
+      <div>
+        <button class="btn btn-success" onclick="changeView()">视图切换</button>
+      </div>
+    </div>
+   
+    <!--第三个弹窗-->
+    <div class="widget-box transparent" id="info" style="position:relative;width:700px;background:#EFEFEF;top:-300px; visibility:hidden;">
+           <div class="widget-header">
+               <h5>风向、航向、浪高</h5>
+               <div class="widget-toolbar">
+                  <!-- <a href="#" data-action="settings">
+                       <i class="icon-cog"></i>
+                   </a>
+                   <a href="#" data-action="reload">
+                       <i class="icon-refresh"></i>
+                   </a>
+                   <a href="#" data-action="collapse">
+                       <i class="icon-chevron-up"></i>
+                   </a> -->
+                   <a href="#" onclick="sethide()">
+                       <i class="icon-remove"></i>
+                   </a>
+               </div>
+           </div>
+           <div class="widget-body"><div class="widget-body-inner" style="display: block;">
+               <div class="widget-main">
+                   tubiao
+                       <div id="sales-charts" style="width: 100%; height: 220px; padding: 0px; position: relative;">
+   <canvas class="flot-base" width="635" height="220"
+           style="direction: ltr; position: absolute; left: 0px; top: 0px; width: 635px; height: 220px;"></canvas>
+   <div class="flot-text"
+        style="position: absolute; top: 0px; left: 0px; bottom: 0px; right: 0px; font-size: smaller; color: rgb(84, 84, 84);">
+       <div class="flot-x-axis flot-x1-axis xAxis x1Axis"
+            style="position: absolute; top: 0px; left: 0px; bottom: 0px; right: 0px; display: block;">
+           <div class="flot-tick-label tickLabel"
+                style="position: absolute; max-width: 79px; top: 201px; left: 33px; text-align: center;">0.0
+           </div>
+           <div class="flot-tick-label tickLabel"
+                style="position: absolute; max-width: 79px; top: 201px; left: 127px; text-align: center;">1.0
+           </div>
+           <div class="flot-tick-label tickLabel"
+                style="position: absolute; max-width: 79px; top: 201px; left: 221px; text-align: center;">2.0
+           </div>
+           <div class="flot-tick-label tickLabel"
+                style="position: absolute; max-width: 79px; top: 201px; left: 316px; text-align: center;">3.0
+           </div>
+           <div class="flot-tick-label tickLabel"
+                style="position: absolute; max-width: 79px; top: 201px; left: 410px; text-align: center;">4.0
+           </div>
+           <div class="flot-tick-label tickLabel"
+                style="position: absolute; max-width: 79px; top: 201px; left: 504px; text-align: center;">5.0
+           </div>
+           <div class="flot-tick-label tickLabel"
+                style="position: absolute; max-width: 79px; top: 201px; left: 598px; text-align: center;">6.0
+           </div>
+       </div>
+       <div class="flot-y-axis flot-y1-axis yAxis y1Axis"
+            style="position: absolute; top: 0px; left: 0px; bottom: 0px; right: 0px; display: block;">
+           <div class="flot-tick-label tickLabel" style="position: absolute; top: 0px; left: 7px; text-align: right;">
+               2.000
+           </div>
+           <div class="flot-tick-label tickLabel"
+                style="position: absolute; top: 187px; left: 1px; text-align: right;">-2.000
+           </div>
+           <div class="flot-tick-label tickLabel"
+                style="position: absolute; top: 164px; left: 1px; text-align: right;">-1.500
+           </div>
+           <div class="flot-tick-label tickLabel"
+                style="position: absolute; top: 140px; left: 1px; text-align: right;">-1.000
+           </div>
+           <div class="flot-tick-label tickLabel"
+                style="position: absolute; top: 117px; left: 1px; text-align: right;">-0.500
+           </div>
+           <div class="flot-tick-label tickLabel" style="position: absolute; top: 94px; left: 7px; text-align: right;">
+               0.000
+           </div>
+           <div class="flot-tick-label tickLabel" style="position: absolute; top: 70px; left: 7px; text-align: right;">
+               0.500
+           </div>
+           <div class="flot-tick-label tickLabel" style="position: absolute; top: 47px; left: 7px; text-align: right;">
+               1.000
+           </div>
+           <div class="flot-tick-label tickLabel" style="position: absolute; top: 23px; left: 7px; text-align: right;">
+               1.500
+           </div>
+       </div>
+   </div>
+   <canvas class="flot-overlay" width="635" height="220"
+           style="direction: ltr; position: absolute; left: 0px; top: 0px; width: 635px; height: 220px;"></canvas>
+   <div class="legend">
+       <div style="position: absolute; width: 70px; height: 66px; top: 14px; right: 14px; opacity: 0.85; background-color: rgb(255, 255, 255);"></div>
+       <table style="position:absolute;top:14px;right:14px;;font-size:smaller;color:#545454">
+           <tbody>
+           <tr>
+               <td class="legendColorBox">
+                   <div style="border:1px solid #ccc;padding:1px">
+                       <div style="width:4px;height:0;border:5px solid rgb(237,194,64);overflow:hidden"></div>
+                   </div>
+               </td>
+               <td class="legendLabel">大风</td>
+           </tr>
+           <tr>
+               <td class="legendColorBox">
+                   <div style="border:1px solid #ccc;padding:1px">
+                       <div style="width:4px;height:0;border:5px solid rgb(175,216,248);overflow:hidden"></div>
+                   </div>
+               </td>
+               <td class="legendLabel">大浪</td>
+           </tr>
+           <tr>
+               <td class="legendColorBox">
+                   <div style="border:1px solid #ccc;padding:1px">
+                       <div style="width:4px;height:0;border:5px solid rgb(203,75,75);overflow:hidden"></div>
+                   </div>
+               </td>
+               <td class="legendLabel">船</td>
+           </tr>
+           </tbody>
+       </table>
+   </div>
+   </div>
+<!--end-tubiao-->
+                </div>
+            </div></div>
+        </div>
+    <div class="btn btn-app btn-xs btn-default ace-settings-btn close" id="ace-timeSlider-button" style="top: -305px;
+    position: relative;z-index: 100;border-radius:0 6px 6px 0  !important">
+        <i class="icon-exchange bigger-150"></i>
+    </div>
+        <div id="bottomPanel" >
+            <div id="timeInfo">
+               <div>东海预报中心 <span id="daterange"></span></div>
+               <div id="timeSliderDiv"></div>
+               </div>
+        </div>
+
+     </div>
+   </div>
+<!--boat fly-->
+<!-- <script src="/assets/js/fly/jquery.min.js" charset="utf-8"></script> -->
+<script src="/js/fly/d3.v3.min.js" charset="utf-8"></script>
+<script src="/js/fly/topojson.v1.min.js"></script>
+<script src="/js/fly/queue.min.js"></script>
+<script src="/js/boat_fly.js"></script>
+<!--boat js end-->
+<script src="/assets/js/jquery-2.1.1.min.js"></script>
+<script src="/assets/js/jquery-ui-1.10.3.custom.min.js"></script>
+<script src="/assets/js/jquery.ui.touch-punch.min.js"></script>
+<script src="/assets/js/bootbox.min.js"></script>
+<script src="/assets/js/jquery.easy-pie-chart.min.js"></script>
+<script src="/assets/js/jquery.gritter.min.js"></script>
+<!-- <script src="/assets/js/spin.min.js"></script> -->
+<!-- <script src="/assets/js/flot/jquery.flot.min.js"></script> -->
+<!-- <script src="/assets/js/flot/jquery.flot.pie.min.js"></script>
+<script src="/assets/js/flot/jquery.flot.resize.min.js"></script> -->
+<!--
+<script src="/assets/js/jquery.1.10.2.min.js"></script> -->
+
+
+<!--[if !IE]> -->
+
+<script type="text/javascript">
+    window.jQuery || document.write("<script src='/assets/js/jquery-2.0.3.min.js'>" + "<" + "/script>");
+</script>
+
+<!-- <![endif]-->
+
+
+<script type="text/javascript">
+    window.jQuery || document.write("<script src='/assets/js/jquery-1.10.2.min.js'>" + "<" + "/script>");
+</script>
+
+<script type="text/javascript">
+    if ("ontouchend" in document) document.write("<script src='/assets/js/jquery.mobile.custom.min.js'>" + "<" + "/script>");
+</script>
+
+
+<!-- page specific plugin scripts -->
+<!-- ace scripts -->
+<script src="/assets/js/bootstrap.min.js"></script>
+<script src="/assets/js/typeahead-bs2.min.js"></script>
+
+<script src="/assets/js/ace-elements.min.js"></script>
+<script src="/assets/js/ace.min.js"></script>
+<script type="text/javascript" src="/js/jquery-ui.js"></script>
+<script src="/js/kendo.all.min.js"></script>
+<script src="/js/jquery.cookie.js"></script>
+<script src="/assets/js/dropzone.min.js"></script>
+<script type="text/javascript" src="/js/terraformer.min.js"></script>
+<script type="text/javascript" src="/js/terraformer-arcgis-parser.min.js"></script>
+
+<script src="http://localhost:8080/arcgis_js_api/library/3.14/3.14/init.js"></script>
+<script src="/js/main2_draw.js"></script>
+<script src="/js/dropdownHeader.js"></script>
+
+<script type="text/javascript">
+    //天气图
+    var today=new Date();
+    var treeListSource;
+    var dayX="";
+    switch (today.getDay()){
+        case 1:dayX="星期一";break;
+        case 2:dayX="星期二";break;
+        case 3:dayX="星期三";break;
+        case 4:dayX="星期四";break;
+        case 5:dayX="星期五";break;
+        case 6:dayX="星期六";break;
+        case 7:dayX="星期日";break;
+    }
+    function actBox(){
+        $("#ace-settings-box").toggleClass("open");
+        // $("#bottomPanel").hide();
+    }
+
+    var rightTopToday=today.getFullYear()+"-"+today.getMonth()+1+"-"+today.getDate()+"  "+dayX;
+    $("#rightTopToday").text(rightTopToday);
+    $("#releaseDateInput").kendoDatePicker({
+        culture:"zh-CN",
+        format:"yyyy/MM/dd",
+        value:today
+    });
+    $("#elementName").kendoDropDownList({
+        optionLabel: "请选择一",
+        dataTextField: "mc",
+        dataValueField: "dm",
+        dataSource:{
+            transport:{
+                read:{
+                    dataType: "json",
+                    url:"/api/config/getAllCategory"
+                }
+            }
+        }
+    });
+    $("#institutionName").kendoDropDownList({
+        optionLabel: "请选择一",
+        dataTextField: "mc",
+        dataValueField: "dm",
+        dataSource:{
+            transport:{
+                read:{
+                    dataType: "json",
+                    url:"/api/config/getAllInstitution"
+                }
+            }
+        }
+    });
+    $("#dataTreeView").kendoGrid({
+        dataSource:{
+            transport:{
+                read:{
+                    dataType: "json",
+                    url:"/api/config/all/0/0/"
+                }
+            }
+        },
+        grid:false,
+        columns:[
+            {hidden: true,field :"id"},
+            {field:"feature",title:"天气图类型"},
+
+        ]
+    });
+
+    var dataSourcePic1 = new kendo.data.DataSource({
+        transport:{
+            read:{
+                dataType: "json",
+                url:"/api/config/getFileList/0/0"
+            }
+        },
+        pageSize: 2
+    });
+    $("#pager").kendoPager({
+        dataSource: dataSourcePic1
+    });
+
+    $("#listView").kendoListView({
+        dataSource: dataSourcePic1,
+        template: kendo.template($("#template").html())
+    });
+
+
+    function changeList(){
+        var element=$("#elementName").val();
+        var institution=$("#institutionName").val();
+        var listUrl="/api/config/";
+
+        if(element!=""&institution!=""){
+            listUrl+="all/"+element+"/"+institution+"/";
+        }
+        else if(institution!=""){
+            listUrl+="allInstitution/"+institution;
+        }
+        else if(element!=""){
+            listUrl+="allElement/"+element;
+        }
+        //天气图下拉框
+        $("#dataTreeView").kendoGrid({
+            dataSource:{
+                transport:{
+                    read:{
+                        dataType: "json",
+                        url:listUrl
+                    }
+                }
+            },
+            grid:false,
+            columns:[
+                {hidden: true,field :"id"},
+                {field:"feature",title:"天气图类型"},
+
+            ],
+            selectable:true,
+            change: function(e) {
+                //获取当前时间和时间间隔
+                var dateInput=$("#releaseDateInput").val();//当前日期
+
+                var timeInput=$("#releaseTimeInput").val();//当前时间
+                if(timeInput=""){
+                    timeInput="00";
+                }
+
+                var year=dateInput.split("/")[0];//当前年份
+                var month=dateInput.split("/")[1];//当前月份
+                var date=dateInput.split("/")[2];//当前日
+                var row = this.select();//当前选中行
+                var data = this.dataItem(row);
+                //路径拼接
+//                var picUrlOrigin=data.path;//
+//                var pic1=picUrlOrigin.replace("{year}",year);
+//                var pic2=pic1.replace("{month}",month);
+//                var picUrl=pic2;
+                //
+                var picId=data.id;//使用图片ID获取图片url，后台拼接地址
+                //图片名称拼接
+                var picName=year+""+month+""+date+""+timeInput+"00";
+//
+//                console.log(pic2+","+picName); // displays "Jane Doe"
+
+                //0119 zhouxuenan 图片展示部分
+                var dataSourcePic = new kendo.data.DataSource({
+                    transport:{
+                        read:{
+                            dataType: "json",
+                            url:"/api/config/getFileList/"+picId+"/"+picName
+                        }
+                    },
+                    pageSize: 4
+                });
+
+                $("#pager").kendoPager({
+                    dataSource: dataSourcePic
+                });
+
+                $("#listView").kendoListView({
+                    dataSource: dataSourcePic,
+                    template: kendo.template($("#template").html())
+                });
+            }
+        });
+    }
+    $("#ace-timeSlider-button").click(function(){
+        $("#ace-timeSlider-button").toggleClass("openTimeSliderButton");
+        $("#bottomPanel").toggleClass("closeTimeSliderPanel");
+    });
+
+
+    function showup(){
+         $("#widget").toggle();
+    }
+    function addDate(){
+        $("#widget1").toggle();
+        }
+    $("#datepicker").datepicker({
+            format: "yyyy-MM-dd",
+            value: new Date()
+        });
+    function sethide(){
+       document.getElementById("info").style.visibility="hidden";
+    }
+    var sales_charts = $('#sales-charts').css({'width':'100%' , 'height':'220px'});
+</script>
+</body>
+</html>

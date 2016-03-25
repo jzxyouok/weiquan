@@ -1,0 +1,147 @@
+/**
+*在Position属性值为absolute的同时，
+*如果有一级父对象（无论是父对象还是祖父对象，或者再高的辈分，一样）
+*的Position属性值为Relative时，则上述的相对浏览器窗口定位将会变成相对父对象定位，
+*这对精确定位是很有帮助的。
+*/
+
+.input-group-addon{
+    width: 33px;
+    height: 27px;
+    position: relative;
+    right: 9px;
+    top: 2px;
+}
+.navbar {
+    position: relative;
+    z-index: 1000;
+    min-height: 1px;
+    margin-bottom: 1px;
+    border: 1px solid rgba(19, 107, 186, 0);;
+}
+#widget{
+    border: 2px solid #17436B;
+    background: #EFEFEF;
+    height: 160px;
+}
+#widget1{
+    border: 2px solid #AAD7FF;
+    background: #EFEFEF;
+}
+#widget-header{
+    background: #2E6BB5;
+}
+#iceArea{
+    width: 113px;
+    margin-left: 32px;
+}
+/*nav导航盒子*/
+div.nav{
+    width:1080px;
+    height:30px;
+    line-height: 36px;
+    text-align: center;
+    font-size: 12px;
+    position: relative;
+
+}
+/*nav-main*/
+ul.nav-main{
+    width: 900px;
+ /*   height: 50px;*/
+    list-style-type: none;
+    margin-top:-32px;
+    margin-left:77px;
+    position: absolute;
+    text-align: center;
+    font-size: 9px;
+}
+ul.nav-main span{
+    display: inline-block;
+    margin-left: 18px;
+    width: 7px;
+    height: 7px;
+    background: url('../img/down-icon.png') no-repeat;
+}
+/*图标向上旋转*/
+.hover-up1{
+    transition-duration: .5s;
+    transform: rotate(180deg);
+    -webkit-transform: rotate(180deg);
+}
+/*图标向下旋转*/
+.hover-down1{
+    transition-duration: .5s;
+    transform: rotate(0deg);
+    -webkit-transform: rotate(0deg);
+}
+.navbar{
+    min-height: 27px;
+    background: rgba(57, 59, 60, 0);
+}
+
+/*导航条设置*/
+ul.nav-main>li{
+    width: 120px;
+    height: 30px;
+    display: block;
+    float: left;
+    background: #ddf2fc;
+    color: #153359;
+    margin-right: 10px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+}
+ul.nav-main>li:hover{
+    background: #ddf2fc;
+}
+/*隐藏盒子设置*/
+div.hidden-box1{
+    width: 118px;
+    border: 1px solid #2f70af;
+    border-top: 0;
+    position: absolute;
+    display:none;
+    background:#2f70af;
+    top: 79px;
+
+}
+.hidden-box1>ul{
+    list-style-type: none;
+    color: #ffffff;
+    cursor: pointer;
+    margin-left: 0px;
+    margin-bottom: 0px;
+}
+.hidden-box1 li:hover{
+    background: #ddf2fc;
+    color: #153359;
+    text-align: center;
+
+}
+/*隐藏盒子位置设置*/
+.hidden-loc-index{
+    left:77px;
+}
+.hidden-loc-us{
+    left: 208px;
+}
+.hidden-loc-info{
+    left: 338px;
+}
+
+.box04{
+    left:468px;
+}
+#map_zoom_slider.esriSimpleSliderTL{
+    top:40px;
+    left: 20px;
+}
+
+.openTimeSliderButton{
+    left: 5px;
+}
+.closeTimeSliderPanel{
+    display: none;
+}
