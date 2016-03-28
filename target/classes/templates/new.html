@@ -112,7 +112,7 @@
         </div>
     </div>
     <!--天气图展示-->
-<div class="ace-settings-container" id="ace-settings-container" style="z-index: 80;right: -7px;">
+<div class="ace-settings-container" id="ace-settings-container" style="z-index: 80;">
     <div class="btn btn-app btn-xs btn-primary ace-settings-btn" id="ace-settings-btn">
         <i class="icon-globe bigger-150"></i>
     </div>
@@ -418,6 +418,14 @@
         <span class="success" onclick="changeView()" title="视图切换"></span>
       </div>
     </div>
+<!--视图模式-->
+<div style="top: 100px;  position: fixed;right: 142px;">
+    <article id="compassHousing">
+        <canvas id="compassFace"></canvas>
+        <canvas id="compassNeedle"></canvas>
+    </article>
+</div>
+<!--视图模式end-->
 <!--海面风数据展示窗口-->
 <div id="winds" class="widget-box" style="float:left;position:absolute;left: 225px; top:305px;visibility: hidden;">
     <div id="windObserved" style="width: 700px;height: 300px;" >

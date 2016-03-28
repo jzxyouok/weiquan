@@ -8,6 +8,54 @@
 /*
 * map view change
 **/
+#compassHousing {
+    margin-left: 5px;
+    margin-top: 5px;
+    background-color: #CCC;
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 62.5px;
+    padding: 2px;
+    position: absolute;
+    z-index: 2;
+    opacity: 0.77;
+    -moz-box-shadow: 2px 3px 10px 2px #333;
+    -webkit-box-shadow: 2px 3px 10px 2px #333;
+    box-shadow: 2px 3px 10px 2px #333;
+}
+/* compass */
+#compassFace {
+    z-index: -1;
+    position: absolute;
+}
+#compassNeedle {
+    position: absolute;
+    -webkit-transition-property: -webkit-transform;
+    -webkit-transition-duration: .5s;
+    -webkit-transition-timing-function: ease-out;
+}
+@media(orientation: landscape) {
+    #compass {
+        margin-top: 20px;
+        margin-left: 20px;
+        opacity: 0.85;
+        filter: alpha(opacity=85);
+        position: absolute;
+        z-index: 2;
+    }
+}
+@media(orientation: portrait) {
+    #compass {
+        margin-top: 20px;
+        margin-left: 20px;
+        opacity: 0.85;
+        filter: alpha(opacity=85);
+        position: absolute;
+        z-index: 2;
+    }
+}
+
+
 .titlePane>.maximize{
     display: none;
 }
@@ -27,10 +75,9 @@ a.k-link.k-nav-today{
     background-color: #fff;
     display: block;
     padding: 5px;
-    position: fixed;
+    position: absolute;
     text-align: center;
     width: 700px;
-    top: 570px;
     left: 20px;
     background: #73A5D6;
     outline: 0 !important;
@@ -158,6 +205,7 @@ a.k-link.k-nav-today{
 /*视图切换end*/
 #ace-settings-container{
     right: 0px;
+    position: fixed !important;
     /*position: fixed !important;*/
 }
 #text1{

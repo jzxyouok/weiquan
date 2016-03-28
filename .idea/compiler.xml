@@ -22,11 +22,11 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
-        <module name="weiquan" />
+        <module name="Ocean_weiquan" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="weiquan" target="1.6" />
+      <module name="Ocean_weiquan" target="1.6" />
     </bytecodeTargetLevel>
   </component>
 </project>
