@@ -31,6 +31,8 @@ public class ConfigApiController {
     @Autowired
     private ProductRepository productRepository;
 
+
+
     //获取所有图片分类信息
     @RequestMapping(value="/getAllCategory", method= RequestMethod.GET)
     public List<D_REFCATEGORY> getAllCategory(){

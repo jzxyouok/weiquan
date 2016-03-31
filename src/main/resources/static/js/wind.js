@@ -26,6 +26,7 @@
             $("#widget").toggle();
         }
     };
+
     var rightTopToday=today.getFullYear()+"-"+today.getMonth()+1+"-"+today.getDate()+"  "+dayX;
     $("#rightTopToday").text(rightTopToday);
 
@@ -107,13 +108,11 @@
             columns:[
                 {hidden: true,field :"id"},
                 {field:"feature",title:"天气图类型"},
-
             ],
             selectable:true,
            /* change: function(e) {*/
                 //获取当前时间和时间间隔
               /*  var dateInput=$("#releaseDateInput").val();//当前日期
-
                 var timeInput=$("#releaseTimeInput").val();//当前时间
                 if(timeInput==""){
                     timeInput="00";
@@ -149,6 +148,7 @@
               },
               pageSize: 4
           });
+
           $("#pager").kendoPager({
               dataSource: dataSourcePic
           });
@@ -176,9 +176,14 @@
       if(flag){
           cha.className="map";
           flag=false;
+          $("#compasss").css("transform","");
+          $(".c_icon").css("transform","");
+          $("#mapDiv_zoom_slider").css("display","block");
       }else{
           cha.className="map1";
+          $("#mapDiv_zoom_slider").css("display","none");
           flag=true;
+
       }
   }
   //控制弹窗显示
@@ -207,11 +212,11 @@ $("#close").click(function(){
     $("#acewaring").toggleClass("open");
 });
  $("#navWarning").attr('checked',true);
-  $("#wind-btn").click(function(){
+ $("#wind-btn").click(function(){
       $("#windScale").toggleClass("open");
       $("#wind-btn").toggleClass("open");
       $("#wind-btn").toggle();
-  });
+ });
   $("#angleRight").click(function(){
       $("#windScale").toggleClass("open");
       $("#wind-btn").toggleClass("open");
@@ -225,9 +230,109 @@ $("#close").click(function(){
      $("#bottomPanel").toggleClass("closeTimeSliderPanel");
      $("#ace-timeSlider-button").css("display","block");
  });
-//infotemplates css 修改
-$(".maximize").css("display","none");
-$(".title").css("font","caption");
-$(".title").css("color","aliceblue");
+    //infotemplates css 修改
+ $(".maximize").css("display","none");
+ $(".title").css("font","caption");
+ $(".title").css("color","aliceblue");
 
+//视图模式
+var img = null,
+    needle = null,
+    ctx = null,degrees=0;
+function clearCanvas() {
+    ctx.clearRect(0, 0, 200, 200);
+}
+function draw() {
+  /*  console.log("degrees before ",degrees);
+    if(degrees==0||degrees==360){
+        degrees=0;
+    }else if(degrees==90){
+        degrees=90;
+    }else if(degrees==180){
+        degrees=180;
+    }else if(degrees==270){
+        degrees=270;
+    }else if(0<degrees<90){
+        degrees=45;
+    }else if(90<degrees<180){
+        degrees=135;
+    }else  if(180<degrees<270){
+        degrees=225;
+    }else if(270<degrees<360){
+        degrees=315;
+    };*/
+    clearCanvas();
+    // Draw the compass onto the canvas
+    ctx.drawImage(img, 0, 0);
+    // Save the current drawing state
+    ctx.save();
+    // Now move across and down half the
+    ctx.translate(15, 15);
+    // Rotate around this point
+    ctx.rotate(degrees * (Math.PI / 180));
+    // Draw the image back and up
+    ctx.drawImage(needle, -10, -10);
+    // Restore the previous drawing state
+    ctx.restore();
+    // Increment the angle of the needle by 5 degrees
+    degrees+=5;
+}
+function imgLoaded() {
+       setInterval(draw,100);
+}
+$(document).ready(function(){
+    var canvas = document.getElementById('compass');
+    if (canvas.getContext('2d')) {
+        ctx = canvas.getContext('2d');
+        // Load the needle image
+        needle = new Image();
+        needle.src = '/img/compass_arrow.png';
+        // Load the compass image
+        img = new Image();
+        img.src = '/img/compass.png';
+        img.onload = imgLoaded;
+    } else {
+        alert("Canvas not supported!");
+    }
+});
+//船载观测数据div xlzheng 20160321
+function setShipObserve(open){
+    var observed = $("#shipOb");
+    var oType=$("#observedType");//观测数据类型窗体
+    if (!observed.data("kendoWindow")) {
+        observed.kendoWindow({
+            width: "900px",
+            height:"300px",
+            actions: ["Custom", "Minimize", "Close"],
+            title: "船载观测数据"
+        });
+    };
+    if (!oType.data("kendoWindow")) {
+        oType.kendoWindow({
+            width: "200px",
+            height:"50px",
+            actions: ["Custom", "Minimize", "Close"],
+            title: "船载观测类型"
+        });
+    };
+
+    //获取船载观测数据图表
+    getObservedData("wind");
+    //获取船载数据grid
+    getObservedGrid();
+    if(open){
+        observed.data("kendoWindow").open();//打开window
+        oType.data("kendoWindow").open();//打开window
+    }else{
+        observed.data("kendoWindow").close();//关闭window
+        oType.data("kendoWindow").close();//关闭window
+    }
+
+}
+//船载观测类型选择
+function chkShipObserveType(obj){
+    var chkValue=obj.value;//选择的值
+    //获取船载观测数据图表
+    getObservedData(chkValue);
+}
 

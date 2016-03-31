@@ -8,54 +8,6 @@
 /*
 * map view change
 **/
-#compassHousing {
-    margin-left: 5px;
-    margin-top: 5px;
-    background-color: #CCC;
-    border-style: solid;
-    border-width: 1px;
-    border-radius: 62.5px;
-    padding: 2px;
-    position: absolute;
-    z-index: 2;
-    opacity: 0.77;
-    -moz-box-shadow: 2px 3px 10px 2px #333;
-    -webkit-box-shadow: 2px 3px 10px 2px #333;
-    box-shadow: 2px 3px 10px 2px #333;
-}
-/* compass */
-#compassFace {
-    z-index: -1;
-    position: absolute;
-}
-#compassNeedle {
-    position: absolute;
-    -webkit-transition-property: -webkit-transform;
-    -webkit-transition-duration: .5s;
-    -webkit-transition-timing-function: ease-out;
-}
-@media(orientation: landscape) {
-    #compass {
-        margin-top: 20px;
-        margin-left: 20px;
-        opacity: 0.85;
-        filter: alpha(opacity=85);
-        position: absolute;
-        z-index: 2;
-    }
-}
-@media(orientation: portrait) {
-    #compass {
-        margin-top: 20px;
-        margin-left: 20px;
-        opacity: 0.85;
-        filter: alpha(opacity=85);
-        position: absolute;
-        z-index: 2;
-    }
-}
-
-
 .titlePane>.maximize{
     display: none;
 }
@@ -75,8 +27,9 @@ a.k-link.k-nav-today{
     background-color: #fff;
     display: block;
     padding: 5px;
-    position: absolute;
+    position: fixed;
     text-align: center;
+    top: 590px;
     width: 700px;
     left: 20px;
     background: #73A5D6;
@@ -168,6 +121,9 @@ a.k-link.k-nav-today{
 .k-window-titlebar{
     background: #1d6fa6;
 }
+.k-window-title{
+    color: #ffffff;
+}
  #window_wnd_title{
     color: aliceblue;
 }
@@ -218,13 +174,18 @@ a.k-link.k-nav-today{
     width:1400px;
     height:855px;
 }
-.map1 {
-    transform: perspective(1000px) rotatex(45deg);  
+.map1
+{
+    transform: perspective(1000px)  rotatex(45deg) scaleY(2.0) scaleX(1.5);
+}
+/*.map1{
+    transform: perspective(1000px) translate(-80px) rotatex(45deg) scaleY(2.0) scaleX(1.5);
     position: relative;
     width: 100%;
     height: 100%;
     margin-bottom: 100px;
-}
+
+}*/
 #main-container{
     top: -13px;
     position: relative;

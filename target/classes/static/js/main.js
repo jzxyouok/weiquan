@@ -132,16 +132,6 @@ require([
              domGeom,win,has,
              on,dom
         ) {
-        var pt1,watchId,COMPASS_SIZE = 80,graphic,compassFaceRadius, compassFaceDiameter;
-        var needleAngle, needleWidth, needleLength, compassRing,renderingInterval = -1, currentHeading,hasCompass;
-        var compassHousing,containerX,containerY,compassNeedleContext;
-        var supportsOrientationChange = "onorientationchange" in window,
-            orientationEvent = supportsOrientationChange ? "orientationchange" : "resize";
-
-        window.addEventListener(orientationEvent, function () {
-            orientationChanged();
-        }, false);
-
         loading = dom.byId("loadingImg");
         map = new Map("mapDiv",{logo:false});//加载底图
         tb = new Draw(map);
@@ -177,339 +167,93 @@ require([
        //地图初始化执行的方法
         var p = {};
         map.on("load",function(){
-            //增加船体图片
-            p.mapPoint = map.extent.getCenter();
-            addGraphics(p);
-            //检查地图加载及定位是否支持
-            mapLoadHandler();
-            //船的视图模式compress
-            loadCompass();
-            //调用画点划线的方法，台风路径展示
-          //  addPath();
+            getshipmessage();
         });
-        function mapLoadHandler() {
-            console.log("yes in maploadhandler")
-            on(window, 'resize', map, map.resize);
-            //检查是否支持定位
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(zoomToLocation, locationError);
-                // retrieve update about the current geographic location of the device
-                watchId = navigator.geolocation.watchPosition(showLocation, locationError);
-            } else {
-                alert("你的浏览器不支持 Visit http://caniuse.com to discover browser support for the Geolocation API.");
-            }
-        }
-        function zoomToLocation(location) {
-            pt1 = esri.geometry.geographicToWebMercator(new Point(location.coords.longitude, location.coords.latitude));
-            addgraph(pt1);
-            map.centerAndZoom(pt1, 6);
-        }
-
-        function showLocation(location) {
-            pt1 = esri.geometry.geographicToWebMercator(new Point(location.coords.longitude, location.coords.latitude));
-            if (!graphic) {
-                addgraph(pt1);
-            } else {
-                //move the graphic if it already exists
-                graphic.setGeometry(pt1);
-            }
-            map.centerAt(pt1);
-        }
-        function addgraph(pt) {
-            var symbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_CIRCLE, 12, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([210, 105, 30, 0.5]), 8), new Color([210, 105, 30, 0.9]));
-            graphic = new Graphic(pt, symbol);
-            map.graphics.add(graphic);
-        }
-        function locationError(error) {
-            //error occurred so stop watchPosition
-            if (navigator.geolocation) {
-                navigator.geolocation.clearWatch(watchId);
-            }
-            switch (error.code) {
-                case error.PERMISSION_DENIED:
-                    alert("Location not provided");
-                    break;
-
-                case error.POSITION_UNAVAILABLE:
-                    alert("Current location not available");
-                    break;
-
-                case error.TIMEOUT:
-                    alert("Timeout");
-                    break;
-
-                default:
-                    alert("unknown error");
-                    break;
-            }
-        }
-        function loadCompass() {
-            console.log("loadcompress");
-            compassHousing = dom.byId("compassHousing");
-            // assign the compass housing dimensions
-            compassHousing.style.height = compassHousing.style.width = COMPASS_SIZE + "px";
-            // return the absolute position of the compass housing
-            containerX = domGeom.position(compassHousing).x;
-            containerY = domGeom.position(compassHousing).y;
-            currentHeading = 0;
-            needleAngle = 0;
-            if (!buildCompassFace()) {
-                return;
-            }
-            drawCompassFace();
-            drawCompassNeedle();
-            hasWebkit();
-        }
-        function buildCompassFace() {
-            // compass housing diameter and radius
-            compassFaceDiameter = COMPASS_SIZE;
-            compassFaceRadius = compassFaceDiameter / 2;
-            // needle length
-            needleLength = compassFaceDiameter;
-            // needle width
-            needleWidth = needleLength / 10;
-            // tick marks
-            compassRing = compassFaceDiameter / 50;
-            return true;
-        }
-        var compassFaceContext;
-        // Draw the coppass face, text labels and font, and tick marks
-        function drawCompassFace() {
-            var compassFaceCanvas = dom.byId("compassFace");
-            compassFaceCanvas.width = compassFaceCanvas.height = compassFaceDiameter;
-            compassFaceContext = compassFaceCanvas.getContext("2d");
-            compassFaceContext.clearRect(0, 0, compassFaceCanvas.width, compassFaceCanvas.height);
-
-            // draw the tick marks and center the compass ring
-            var xOffset, yOffset;
-            xOffset = yOffset = compassFaceCanvas.width / 2;
-            for (var i = 0; i < 360; ++i) {
-                var x = (compassFaceRadius * Math.cos(degToRad(i))) + xOffset;
-                var y = (compassFaceRadius * Math.sin(degToRad(i))) + yOffset;
-                var x2 = ((compassFaceRadius - compassRing) * Math.cos(degToRad(i))) + xOffset;
-                var y2 = ((compassFaceRadius - compassRing) * Math.sin(degToRad(i))) + yOffset;
-                compassFaceContext.beginPath();
-                compassFaceContext.moveTo(x, y);
-                compassFaceContext.lineTo(x2, y2);
-                compassFaceContext.closePath();
-                compassFaceContext.stroke();
-                i = i + 4;
-            }
-            // The measureText method returns an object, with one attribute: width.
-            // The width attribute returns the width of the text, in pixels.
-            compassFaceContext.font = "10px Arial";
-            compassFaceContext.textAlign = "center";
-            var metrics = compassFaceContext.measureText('N');
-            compassFaceContext.fillText('N', compassFaceRadius, 15);
-            compassFaceContext.fillText('S', compassFaceRadius, compassFaceDiameter - 10);
-            compassFaceContext.fillText('E', (compassFaceRadius + (compassFaceRadius - metrics.width)), compassFaceRadius);
-            compassFaceContext.fillText('W', 10, compassFaceRadius);
-        }
-        // Draw the compass needle
-        function drawCompassNeedle() {
-            var compassNeedle = dom.byId("compassNeedle");
-            compassNeedle.width = compassNeedle.height = compassFaceDiameter;
-            compassNeedle.style.left = Math.floor(compassFaceContext.width / 2) + "px";
-            compassNeedle.style.top = Math.floor(compassFaceContext.height / 2) + "px";
-            compassNeedleContext = compassNeedle.getContext("2d");
-            compassNeedleContext.translate(compassFaceRadius, compassFaceRadius);
-            compassNeedleContext.clearRect((compassNeedleContext.canvas.width / 2) * -1, (compassNeedleContext.canvas.height / 2) * -1, compassNeedleContext.canvas.width, compassNeedleContext.canvas.height);
-
-            // The first step to create a path is calling the beginPath method. Internally, paths are stored as a list of sub-paths
-            // (lines, arcs, etc) which together form a shape. Every time this method is called, the list is reset and we can start
-            // drawing new shapes.
-
-            // SOUTH
-            compassNeedleContext.beginPath();
-            compassNeedleContext.lineWidth = 1;
-            compassNeedleContext.moveTo(0, 5);
-            compassNeedleContext.lineTo(0, compassFaceRadius);
-            compassNeedleContext.stroke();
-            // circle around label
-            compassNeedleContext.beginPath();
-            compassNeedleContext.arc(0, compassFaceRadius - 15, 8, 0, 2 * Math.PI, false);
-            compassNeedleContext.fillStyle = "#FFF";
-            compassNeedleContext.fill();
-            compassNeedleContext.lineWidth = 1;
-            compassNeedleContext.strokeStyle = "black";
-            compassNeedleContext.stroke();
-            // S
-            compassNeedleContext.beginPath();
-            compassNeedleContext.moveTo(0, 0);
-            compassNeedleContext.font = "normal 10px Verdana";
-            compassNeedleContext.fillStyle = "#000";
-            compassNeedleContext.textAlign = "center";
-            compassNeedleContext.fillText("S", 0, compassFaceRadius - 10);
-            // needle
-            compassNeedleContext.beginPath();
-            compassNeedleContext.fillStyle = "#000";
-            compassNeedleContext.moveTo(0, 0);
-            compassNeedleContext.lineTo(0, needleLength / 4);
-            compassNeedleContext.lineTo((needleWidth / 4) * -1, 0);
-            compassNeedleContext.fill();
-            compassNeedleContext.beginPath();
-            compassNeedleContext.fillStyle = "#000";
-            compassNeedleContext.moveTo(0, 0);
-            compassNeedleContext.lineTo(0, needleLength / 4);
-            compassNeedleContext.lineTo(needleWidth / 4, 0);
-            compassNeedleContext.fill();
-
-
-            // NORTH
-            compassNeedleContext.beginPath();
-            compassNeedleContext.lineWidth = 1;
-            compassNeedleContext.moveTo(0, 0);
-            compassNeedleContext.lineTo(0, - compassFaceRadius);
-            compassNeedleContext.stroke();
-            // circle
-            compassNeedleContext.beginPath();
-            compassNeedleContext.arc(0, - (compassFaceRadius - 16), 8, 0, 2 * Math.PI, false);
-            compassNeedleContext.fillStyle = "#FFF";
-            compassNeedleContext.fill();
-            compassNeedleContext.lineWidth = 1;
-            compassNeedleContext.strokeStyle = "black";
-            compassNeedleContext.stroke();
-            // N
-            compassNeedleContext.beginPath();
-            compassNeedleContext.moveTo(0, 0);
-            compassNeedleContext.font = "normal 10px Verdana";
-            compassNeedleContext.fillStyle = "#000";
-            compassNeedleContext.textAlign = "center";
-            compassNeedleContext.fillText("N", 0, - (compassFaceRadius - 20));
-            // needle
-            compassNeedleContext.beginPath();
-            compassNeedleContext.fillStyle = "#000";
-            compassNeedleContext.moveTo(0, 0);
-            compassNeedleContext.lineTo(0, (needleLength / 4) * -1);
-            compassNeedleContext.lineTo((needleWidth / 4) * -1, 0);
-            compassNeedleContext.fill();
-            compassNeedleContext.beginPath();
-            compassNeedleContext.fillStyle = "#000";
-            compassNeedleContext.moveTo(0, 0);
-            compassNeedleContext.lineTo(0, (needleLength / 4) * -1);
-            compassNeedleContext.lineTo(needleWidth / 4, 0);
-            compassNeedleContext.fill();
-
-            // center pin color
-            compassNeedleContext.beginPath();
-            compassNeedleContext.arc(0, 0, 10, 0, 2 * Math.PI, false);
-            compassNeedleContext.fillStyle = "rgb(255,255,255)";
-            compassNeedleContext.fill();
-            compassNeedleContext.lineWidth = 1;
-            compassNeedleContext.strokeStyle = "black";
-            compassNeedleContext.stroke();
-
-            compassNeedleContext.beginPath();
-            compassNeedleContext.moveTo(0, 0);
-            compassNeedleContext.arc(0, 0, (needleWidth / 4), 0, degToRad(360), false);
-            compassNeedleContext.fillStyle = "#000";
-            compassNeedleContext.fill();
-        }
-        var orientationHandle;
-        function orientationChangeHandler() {
-            // An event handler for device orientation events sent to the window.
-            orientationHandle = on(window, "deviceorientation", onDeviceOrientationChange);
-            // The setInterval() method calls rotateNeedle at specified intervals (in milliseconds).
-            renderingInterval = setInterval(rotateNeedle, 100);
-        }
-
-        var compassTestHandle;
-        function hasWebkit() {
-            if (has("ff") || has("ie") || has("opera")) {
-                hasCompass = false;
-                orientationChangeHandler();
-                alert("Your browser does not support WebKit.");
-            } else if (window.DeviceOrientationEvent) {
-                compassTestHandle = on(window, "deviceorientation", hasGyroscope);
-            } else {
-                hasCompass = false;
-                orientationChangeHandler();
-            }
-        }
-
-        // Test if the device has a gyroscope.
-        // Instances of the DeviceOrientationEvent class are fired only when the device has a gyroscope and while the user is changing the orientation.
-        function hasGyroscope(event) {
-            dojo.disconnect(compassTestHandle);
-            if (event.webkitCompassHeading !== undefined || event.alpha != null) {
-                hasCompass = true;
-            } else {
-                hasCompass = false;
-            }
-            orientationChangeHandler();
-        }
-
-        // Rotate the needle based on the device's current heading
-        function rotateNeedle() {
-            var multiplier = Math.floor(needleAngle / 360);
-            var adjustedNeedleAngle = needleAngle - (360 * multiplier);
-            var delta = currentHeading - adjustedNeedleAngle;
-            if (Math.abs(delta) > 180) {
-                if (delta < 0) {
-                    delta += 360;
-                } else {
-                    delta -= 360;
+        function getshipmessage(){
+            var url="/api/tbjhship/getAllMessages";
+            $.ajax({
+                type:"GET",
+                url:url,
+                success:function(data){
+                    console.log("data is get success",data);
+                    addGraphics(data);
+                },
+                error:function(data){
+                    console.log(data);
                 }
-            }
-            delta /= 5;
-            needleAngle = needleAngle + delta;
-            var updatedAngle = needleAngle - window.orientation;
-            // rotate the needle
-            dom.byId("compassNeedle").style.webkitTransform = "rotate(" + updatedAngle + "deg)";
+            });
         }
+        /*map.on("load",function(){
+            //增加船体图片
+            getshipmessage()
+          //  p.mapPoint = map.extent.getCenter();
+          //  addGraphics();
+            //船的视图模式compress
 
-        function onDeviceOrientationChange(event) {
-            var accuracy;
-            if (event.webkitCompassHeading !== undefined) {
-                // Direction values are measured in degrees starting at due north and continuing clockwise around the compass.
-                // Thus, north is 0 degrees, east is 90 degrees, south is 180 degrees, and so on. A negative value indicates an invalid direction.
-                currentHeading = (360 - event.webkitCompassHeading);
-                accuracy = event.webkitCompassAccuracy;
-            } else if (event.alpha != null) {
-                // alpha returns the rotation of the device around the Z axis; that is, the number of degrees by which the device is being twisted
-                // around the center of the screen
-                // (support for android)
-                currentHeading = (270 - event.alpha) * -1;
-                accuracy = event.webkitCompassAccuracy;
-            }
-
-            if (accuracy < 11) {
-                compassNeedleContext.fillStyle = "rgba(0, 205, 0, 0.9)";
-            } else if (accuracy >= 15 && accuracy < 25) {
-                compassNeedleContext.fillStyle = "rgba(255, 255, 0, 0.9)";
-            } else if (accuracy > 24) {
-                compassNeedleContext.fillStyle = "rgba(255, 0, 0, 0.9)";
-            }
-            compassNeedleContext.fill();
-
-            if (renderingInterval == -1) {
-                rotateNeedle();
-            }
-        }
-
-        // Convert degrees to radians
-        function degToRad(deg) {
-            return (deg * Math.PI) / 180;
-        }
-        // Handle portrait and landscape mode orientation changes
-        function orientationChanged() {
-            if (map) {
-                map.reposition();
-                map.resize();
-            }
-        }
-
+           //调用画点划线的方法，台风路径展示
+          //  addPath();
+        });*/
+        //增加船体图片
+        function addGraphics(evt){
+            // Get a point to place the marker
+           /* var pt = evt.mapPoint;
+            if (!pt) {
+                pt = map.graphics.graphics[0].geometry;
+            }*/
+            // Create marker (picture) symbol
+            var lat = evt[0].lat;
+            var lon = evt[0].lon;
+            p = new esri.geometry.Point(lon,lat,sr);
+            console.log("p is",p);
+            var  symMarker = createPictureSymbol('/img/boat1.png', 0, 12, 30, 40);
+            var infoTemplate = new InfoTemplate("航行预警","航速: 20km/h<br>航向: 东南<br>大风预警：距离3级大风还有100海里，预计当前船速3分钟内到达风圈<br>" +
+                "大浪预警：距离3级大浪还有200海里，预警当前航速5分钟到达浪圈<br>" +
+                "台风预警：距离台风风眼还有400海里");
+            var pictureGraphic = new Graphic(p, symMarker, null, infoTemplate);
+            map.graphics.add(pictureGraphic);
+            //注册点击的graphics事件
+            dojo.connect(map.graphics, "onClick", function(){
+                //显示船载观测数据窗体
+                setShipObserve(true);
+                $("#dataType").css("display","block");
+                $("#shipobserve").css("display","block");
+            });
+            //鼠标经过船体事件
+      /*      dojo.connect(map.graphics,"onMouseOver",function(evt){
+                map.infoWindow.setTitle("设备类型:"+evt.mapPoint.x);
+                map.infoWindow.setContent("ceshi");
+            });*/
+        };
+        //pictureSymbol的创建方法
+        function createPictureSymbol(url, xOffset, yOffset, xWidth, yHeight) {
+            return new PictureMarkerSymbol(
+                {
+                    "angle": 0,
+                    "xoffset": xOffset, "yoffset": yOffset, "type": "esriPMS",
+                    "url": url,
+                    "contentType": "image/png",
+                    "width":xWidth, "height": yHeight
+                });
+        };
+        //气泡展示方法
+        function setPopup(map,anchorPos,xOffset,yOffset) {
+            var popup  = map.infoWindow;
+            popup.highlight = false;
+            popup.set("anchor", anchorPos);
+            popup.domNode.style.marginLeft = xOffset+"px";
+            popup.domNode.style.marginTop = yOffset+"px";
+        };
         //单击获取map页面的点
         function getPoint(evt){
-            console.log("evt is",evt);
+            console.log("evt  is",evt);
             //单击后获取当前点的坐标值
             var point = evt.mapPoint;
             console.log("point is",point);
             map.graphics.clear();
+            getshipmessage();
             //添加一个graphic在当前点的位置上
             var ptGraphic = new Graphic(point, pointSymbol);
             map.graphics.add(ptGraphic);
-            addGraphics(p);
             //添加一个半径当前点
             var buffer = geometryEngine.geodesicBuffer(point, 10, "miles");
             var bufferGraphic = new Graphic(buffer, buffSymbol);
@@ -522,16 +266,17 @@ require([
                         console.log("flag is"+flag);
                         //弹窗数据展示
                         switch (flag){
-                            case 1: setwindObserve();console.log("海面风数据加载成功，绘制图表");
+                            case 1: setwindObserve(point);console.log("海面风数据加载成功，绘制图表");
                                 break;
-                            case 2: setShipObservedWin();break;
-                            case 3: setflowObserver();console.log("海流数据加载成功，绘制图表");break;
-                            case 4: setWaveVisibility();break;
+                            case 2: setShipObservedWin(point);console.log("海浪数据加载成功，绘制图表");break;
+                            case 3: setflowObserver(point);console.log("海流数据加载成功，绘制图表");break;
+                            case 4: setWaveVisibility(point);console.log("能见度数据加载成功，绘制图表");break;
                             default :
                                 console.log("eeee");break;
                         }
                     }else{
-                        alert("this is land ");
+                        //如果是陆地的话，气泡显示经纬度
+                        console.log("point"+point.x+point.y);
                     }
                 }
             }
@@ -546,7 +291,7 @@ require([
             };
         };
         //海平面数据展示
-        function setwindObserve(){
+        function setwindObserve(evt){
             $("#winds").css("visibility","visible");
             var observed = $("#windObserved");//数据窗体
             if (!observed.data("kendoWindow")) {
@@ -558,11 +303,11 @@ require([
                 });
             };
             //获取数据
-            getObservedData();
+            getObservedData(evt);
             observed.data("kendoWindow").open();//打开window
         };
         //海浪数据弹窗展示
-        function setShipObservedWin(){
+        function setShipObservedWin(evt){
             $("#ship").css("visibility","visible");
             console.log("setshipObservedWin");
             var observed = $("#shipObserved");//数据窗体
@@ -575,11 +320,11 @@ require([
                 });
             };
             //获取船载观测数据
-            getObservedData();
+            getObservedData(evt);
             observed.data("kendoWindow").open();//打开window
         };
         //海流数据弹窗展示
-        function setflowObserver(){
+        function setflowObserver(evt){
             $("#sflow").css("visibility","visible");
             var observed = $("#wflow");//数据窗体
             if (!observed.data("kendoWindow")) {
@@ -591,11 +336,11 @@ require([
                 });
             };
             //获取数据
-            getObservedData();
+            getObservedData(evt);
             observed.data("kendoWindow").open();//打开window
         };
         //能见度数据弹窗展示
-        function  setWaveVisibility(){
+        function  setWaveVisibility(evt){
             console.log("能见度");
             $("#visibile").css("visibility","visible");
             var observed = $("#Evisibled");//能见度数据窗体
@@ -608,15 +353,15 @@ require([
                 });
             };
             //获取船载观测数据
-            getObservedData();
+            getObservedData(evt);
             observed.data("kendoWindow").open();//打开window
         }
         //数据获取
-        function getObservedData(){
+        function getObservedData(evt){
             //海面风
             $("#chart1").kendoChart({
                 title: {
-                    text: "海面风数据展示 \n /风级大小/"
+                    text: "当前坐标("+evt.x+","+evt.y+")"
                 },
                 legend: {
                     position: "bottom"
@@ -643,7 +388,7 @@ require([
                 }],
                 valueAxis: {
                     labels: {
-                        format: "{0}%"
+                        format: "{0}"
                     },
                     line: {
                         visible: false
@@ -680,7 +425,7 @@ require([
                     }
                 },
                 title: {
-                    text: "东海海域单点海浪预报曲线"
+                    text: "东海海域单点海浪预报曲线 \n "+"("+evt.x+","+evt.y+")"
                 },
                 legend: {
                     position: "top"
@@ -722,7 +467,7 @@ require([
             //海流
             $("#chart3").kendoChart({
                 title: {
-                    text: "海流数据展示"
+                    text: "海流数据展示 \n"+"("+evt.x+","+evt.y+")"
                 },
                 legend: {
                     position: "bottom"
@@ -784,7 +529,7 @@ require([
                     data: grandSlam
                 },
                 title:{
-                    text:"能见度数据展示"
+                    text:"能见度数据展示 \n"+"("+evt.x+","+evt.y+")"
                 },
                 legend: {
                     position: "bottom"
@@ -927,45 +672,6 @@ require([
                     }
                 });
             }
-        };
-        //增加船体图片
-        function addGraphics(evt){
-            // Get a point to place the marker
-            var pt = evt.mapPoint;
-            if (!pt) {
-                pt = map.graphics.graphics[0].geometry;
-            }
-            // Create marker (picture) symbol
-            var  symMarker = createPictureSymbol('/img/boat1.png', 0, 12, 30, 40);
-            var infoTemplate = new InfoTemplate("航行预警","航速: 20km/h<br>航向: 东南<br>大风预警：距离3级大风还有100海里，预计当前船速3分钟内到达风圈<br>" +
-                "大浪预警：距离3级大浪还有200海里，预警当前航速5分钟到达浪圈<br>" +
-                "台风预警：距离台风风眼还有400海里");
-            var pictureGraphic = new Graphic(pt, symMarker, null, infoTemplate);
-            map.graphics.add(pictureGraphic);
-            // Setup popup
-            setPopup(map, "top", 0, -35);
-            if (map.infoWindow.isShowing) {
-                map.infoWindow.show(pt);
-            }
-        };
-        //pictureSymbol的创建方法
-        function createPictureSymbol(url, xOffset, yOffset, xWidth, yHeight) {
-            return new PictureMarkerSymbol(
-                {
-                    "angle": 0,
-                    "xoffset": xOffset, "yoffset": yOffset, "type": "esriPMS",
-                    "url": url,
-                    "contentType": "image/png",
-                    "width":xWidth, "height": yHeight
-                });
-        };
-        //气泡展示方法
-        function setPopup(map,anchorPos,xOffset,yOffset) {
-            var popup  = map.infoWindow;
-            popup.highlight = false;
-            popup.set("anchor", anchorPos);
-            popup.domNode.style.marginLeft = xOffset+"px";
-            popup.domNode.style.marginTop = yOffset+"px";
         };
         //海面风数据加载
         $("#wind").click(function(){

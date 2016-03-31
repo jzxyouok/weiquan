@@ -419,11 +419,8 @@
       </div>
     </div>
 <!--视图模式-->
-<div style="top: 100px;  position: fixed;right: 142px;">
-    <article id="compassHousing">
-        <canvas id="compassFace"></canvas>
-        <canvas id="compassNeedle"></canvas>
-    </article>
+<div style="top: 100px;  position: fixed;right: 40px;" id="compasss" >
+    <canvas id="compass" width="60" height="60"></canvas>
 </div>
 <!--视图模式end-->
 <!--海面风数据展示窗口-->
@@ -460,6 +457,27 @@
         </div>
     </div>
 </div>
+
+<!--船载观测数据类型窗口-->
+<div id="dataType" class="widget-box" style="display:none;float:left;position:fixed;left: 22px; top:316px!important;">
+    <div id="observedType">
+        <div style="margin-top: 15px;">
+            <label style="font-size: 10pt;font-family: Times New Roman,Georgia,Serif;"><input name="type" type="radio" value="wind" checked onchange="chkShipObserveType(this);"/>&nbsp;&nbsp;<img src="/img/ships/wind.jpg">&nbsp;&nbsp;风场 </label>&nbsp;&nbsp;
+            <label style="font-size: 10pt;font-family: Times New Roman,Georgia,Serif;"><input name="type" type="radio" value="pa" onchange="chkShipObserveType(this);"/>&nbsp;&nbsp;<img src="/img/ships/pa.png">&nbsp;&nbsp;气压 </label>
+        </div>
+    </div>
+</div>
+<!--船载观测数据展示窗口-->
+<div id="shipobserve" style="display: none; position:fixed;left: 200px!important; top:316px!important;">
+    <div id="shipOb" style="width: 900px;height: 300px;">
+        <!--图表-->
+        <div id="chart" style="float: left;width: 450px;height: 280px;"></div>
+        <!--数据列表-->
+        <div id="grid" style="margin-left:25px;float: left;width: 400px;height: 280px;"></div>
+
+    </div>
+</div>
+
 
 <!--时间播放条-->
     <div class="btn btn-app btn-xs btn-primary ace-settings-btn" id="ace-timeSlider-button">
@@ -626,7 +644,7 @@
 <script src="/assets/js/ace-elements.min.js"></script>
 <script src="/assets/js/ace.min.js"></script>
 <script type="text/javascript" src="/js/jquery-ui.js"></script>
-<script src="/js/kendo.all.min.js"></script>
+<script src="/js/kendo.all.min2.js"></script>
 <script src="/js/kendo.messages.zh-CN.js"></script>
 <script src="/js/jquery.cookie.js"></script>
 <script src="/assets/js/dropzone.min.js"></script>
@@ -634,8 +652,11 @@
 <script type="text/javascript" src="/js/terraformer-arcgis-parser.min.js"></script>
 <script type="text/javascript" src="http://localhost:8080/arcgis_js_api/library/3.14/3.14/init.js"></script>
 <script src="/js/main.js"></script>
+
 <script src="/js/dropdownHeader.js"></script>
 <script src="/js/wind.js"></script>
+<!--船载数据js-->
+<script src="/js/shipObserved.js"></script>
 
 <script>
     //iframe 切换

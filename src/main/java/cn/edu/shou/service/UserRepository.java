@@ -55,6 +55,4 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
     public User getUserInfoByUserName(@Param("userName") String userName);
 
 
-
-
 }
