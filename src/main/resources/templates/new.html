@@ -132,15 +132,15 @@
                     <td >
                         <li class="li-style-type"style="height: 35px;margin-top: 15px">
                             要素名称：
-                            <input  id="elementName"  style="display:inline-block;" onchange="changeList()"/>
+                            <input  id="elementName"  style="display:inline-block;" onchange="changeFun()"/>
                         </li>
-                        <li class="li-style-type"style="height: 35px">
+                        <li class="li-style-type"style="height: 35px" >
                             发布机构：
-                            <input id="institutionName" style="display:inline-block; " onchange="changeList()"/>
+                            <input id="institutionName" style="display:inline-block; " onchange="changeFun()"/>
                         </li>
-                        <li class="li-style-type" style="display: inline-block;">
+                        <li class="li-style-type" style="display: inline-block;" id="releaseDateInputLi" >
                             发布时间：
-                            <input type="text" id="releaseDateInput" style="width: 160px" placeholder="请选择时间..." >&nbsp;
+                            <input type="text" id="releaseDateInput" style="width: 160px" placeholder="请选择时间..." onchange="changeList()" >&nbsp;
                         </li>
                         <li class="li-style-type"style="margin-top: 20px">
                             <div style=" width: 250px;height: 350px;border-width:2px">
@@ -159,8 +159,8 @@
                         </div>
                         <script type="text/x-kendo-template" id="template">
                             <div class="product">
-                                <a href="http://localhost:8080/#:url#" class="fancybox" data-fancybox-group="gallery" >
-                                    <img id ="src" src="http://localhost:8080/#:url#" alt="#:picName# " />
+                                <a href="http://localhost:8080/weather/#:url#" class="fancybox" data-fancybox-group="gallery" >
+                                    <img id ="src" src="http://localhost:8080/weather/#:url#" alt="#:picName# " />
                                 </a>
                                 <h3>#:picName#</h3>
                             </div>
@@ -200,8 +200,65 @@
             </div>
     </div>
     <!--大风大浪预警end-->
+<!--浪-->
+<div class="ace-settings-container"  style="z-index: 100;top:400px;position: fixed;">
+    <div class="btn btn-app btn-xs btn-primary ace-settings-btn" style="right:0px;position: relative;top:190px;" id="wave-btn">
+    <i class="icon-list-ul bigger-150"></i>
+    </div>
+    <div id="waveScale" class="widget-box ace-settings-box "style="display:none;width: 75px;background: #73A5D6;border-radius: 5px;border:1px solid #3C4C5C;">
+        <label style="color: #ffffff;">浪</label>
+        <i class="icon-double-angle-right" style="margin-left: 5px;color: #ffffff" id="rightAngle"></i>
+        <table>
+            <tr>
+                <td><img src="/img/windScale.jpg" style="width:25px;height:175px"></td>
+                <td style="color: #ffffff">
+                    <label style="color: #ffffff;margin-left: -8px">（级）</label>
+                    <lable>12<br/></lable>
+                    <lable>11<br/></lable>
+                    <lable>10<br/></lable>
+                    <lable>9<br/></lable>
+                    <lable>8<br/></lable>
+                    <lable>7<br/></lable>
+                    <lable>6<br/></lable>
+                    <lable>5<br/></lable>
+                    <lable>4<br/></lable>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+<!--浪end-->
 <!--风力-->
 <div class="ace-settings-container"  style="z-index: 100;top:400px;position: fixed">
+   <!-- <div class="btn btn-app btn-xs btn-primary ace-settings-btn" style="right:0px;position: relative;top:190px" id="wind-btn">
+    <i class="icon-list-ul bigger-150"></i>
+    </div>-->
+    <div id="windScale" class="widget-box ace-settings-box "style="display:none;width: 75px;background: #73A5D6;border-radius: 5px;border:1px solid #3C4C5C;">
+        <label style="color: #ffffff;">风力</label>
+        <i class="icon-double-angle-right" style="margin-left: 5px;color: #ffffff" id="angleRight"></i>
+        <table>
+            <tr>
+                <td><img src="/img/windScale.jpg" style="width:25px;height:175px"></td>
+                <td style="color: #ffffff">
+                    <label style="color: #ffffff;margin-left: -8px">（级）</label>
+                    <lable>12<br/></lable>
+                    <lable>11<br/></lable>
+                    <lable>10<br/></lable>
+                    <lable>9<br/></lable>
+                    <lable>8<br/></lable>
+                    <lable>7<br/></lable>
+                    <lable>6<br/></lable>
+                    <lable>5<br/></lable>
+                    <lable>4<br/></lable>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+<!--风力end-->
+
+<!--风力-->
+<!--<div class="ace-settings-container"  style="z-index: 100;top:400px;position: fixed">
     <div class="btn btn-app btn-xs btn-primary ace-settings-btn" style="position: relative;top:190px" id="wind-btn">
         <i class="icon-list-ul bigger-150"></i>
     </div>
@@ -226,7 +283,7 @@
             </tr>
         </table>
     </div>
-</div>
+</div>-->
 <!--风力end-->
 
 <!--info 展示-->

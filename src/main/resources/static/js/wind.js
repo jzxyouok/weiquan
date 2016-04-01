@@ -32,9 +32,8 @@
 
     $("#releaseDateInput").kendoDatePicker({
         culture:"zh-CN",
-        start: "year",
-        depth: "year",
-        format: "yyyy/MM"
+
+        format: "yyyy/MM/dd"
     //        value:today
     });
     $("#elementName").kendoDropDownList({
@@ -79,51 +78,98 @@
 
         ]
     });
-
-  function changeList(){
-        var element=$("#elementName").val();
-        var institution=$("#institutionName").val();
-        var listUrl="/api/config/";
-
-        if(element!=""&institution!=""){
-            listUrl+="all/"+element+"/"+institution+"/";
-        }
-        else if(institution!=""){
-            listUrl+="allInstitution/"+institution;
-        }
-        else if(element!=""){
-            listUrl+="allElement/"+element;
-        }
-        //天气图下拉框
-        $("#dataTreeView").kendoGrid({
-            dataSource:{
-                transport:{
-                    read:{
-                        dataType: "json",
-                        url:listUrl
-                    }
-                }
-            },
-            grid:false,
-            columns:[
-                {hidden: true,field :"id"},
-                {field:"feature",title:"天气图类型"},
-            ],
-            selectable:true,
-           /* change: function(e) {*/
-                //获取当前时间和时间间隔
-              /*  var dateInput=$("#releaseDateInput").val();//当前日期
-                var timeInput=$("#releaseTimeInput").val();//当前时间
-                if(timeInput==""){
-                    timeInput="00";
-                }*/
-                change: function() {
-                    var row = this.select();//当前选中行
-                    var data = this.dataItem(row);
-                    bindListPics(data);
-                }
-             });
+//日历控件初始不可选
+var datepicker = $("#releaseDateInput").data("kendoDatePicker");
+datepicker.readonly(true);
+//必选要素名称、发布机构、发布时间
+$("#releaseDateInputLi").click(function(){
+    var element=$("#elementName").val();//要素名称
+    var institution=$("#institutionName").val();//发布机构
+    if(element==""&& institution==""){
+        alert("请选择要素名称、发布机构");
+    }else if(element==""){
+        alert("请选择要素名称");
+    }else if(institution==""){
+        alert("请选择发布机构");
     }
+});
+//改变要素名称、发布机构时，发布时间变为可选择
+function changeFun(){
+    var element=$("#elementName").val();//要素名称
+    var date=$("#releaseDateInput").val();//发布时间
+    var institutionName=$("#institutionName");//发布机构
+    if(element!="" && date!="" && institutionName!=""){
+        changeList();
+    }else if(element!="" && institutionName!=""){
+        datepicker.readonly(false);
+    }
+};
+function changeList(){
+    var element=$("#elementName").val();//要素名称
+    var institution=$("#institutionName").val();//发布机构
+    var listUrl="/api/config/";
+    if(element!="" && institution!=""){
+        listUrl+="all/"+element+"/"+institution+"/";
+    }
+    else if(institution!=""){
+        listUrl+="allInstitution/"+institution;
+    }
+    else if(element!=""){
+        listUrl+="allElement/"+element;
+    }
+    var datepicker = $("#releaseDateInput").data("kendoDatePicker");
+    var date=datepicker.value();
+    listUrl=listUrl+date;
+    //天气图下拉框
+    initDataTreeView(listUrl);
+    var totalRecords=$("#dataTreeView").data("kendoGrid").dataSource.total();//显示dataSource的数据总数
+    if(totalRecords==0){
+        $("#noDataImg").css("display","block");
+        $("#listView").css("display","none");
+        $("#pager").css("display","none");
+        $("#inputData").css("display","none");
+    }else{
+        $("#noDataImg").css("display","none");
+        $("#inputData").css("display","none");
+        $("#listView").css("display","block");
+        $("#pager").css("display","block");
+        //加载第一类的图片数据
+        var grid = $("#dataTreeView").data("kendoGrid");
+        var initId=grid._data[0].id;//获取到需要初始化数据的ID
+        bindListPics(initId);//绑定图片数据
+        grid.select("tr:eq(0)");
+    }
+}
+//初始化grid
+function initDataTreeView(listUrl){
+    $("#dataTreeView").kendoGrid({
+        dataSource:{
+            transport:{
+                read:{
+                    async:false,
+                    dataType: "json",
+                    url:listUrl
+                }
+            }
+        },
+        hidden:false,
+        grid:false,
+        columns:[
+            {hidden: true,field :"id"},
+            {field:"feature",title:"天气图类型"}
+        ],
+        selectable:"row",
+        change: function(e) {
+            var row = this.select();//当前选中行
+            var data = this.dataItem(row);
+            if(data==null){
+                data=this.dataItem("tr:eq(0)");
+            }
+            data==null?"":bindListPics(data.id);
+        }
+    });
+}
+
       function bindListPics(data){
           //获取输入的时间和时间间隔
           var dateInput=$("#releaseDateInput").val();//输入的日期
@@ -134,7 +180,7 @@
           var year=dateInput.split("/")[0];//输入年份
           var month=dateInput.split("/")[1];//输入月份
           var date=dateInput.split("/")[2];//输入的日
-          var picId=data.id;//使用图片ID获取图片url，后台拼接地址
+          var picId=data;//使用图片ID获取图片url，后台拼接地址
           //图片名称拼接
           var picName=year+""+month+""+date+""+timeInput+"00";
           //0119 zhouxuenan 图片展示部分
@@ -212,7 +258,8 @@ $("#close").click(function(){
     $("#acewaring").toggleClass("open");
 });
  $("#navWarning").attr('checked',true);
- $("#wind-btn").click(function(){
+//风力浪
+/* $("#wind-btn").click(function(){
       $("#windScale").toggleClass("open");
       $("#wind-btn").toggleClass("open");
       $("#wind-btn").toggle();
@@ -221,7 +268,47 @@ $("#close").click(function(){
       $("#windScale").toggleClass("open");
       $("#wind-btn").toggleClass("open");
       $("#wind-btn").toggle();
-  });
+  });*/
+//风力等级图片显示
+/*$("#wind-btn").click(function(){
+    $("#windScale").toggleClass("open");
+    $("#waveScale").toggle();
+    $("#wind-btn").toggleClass("open");
+    $("#wind-btn").toggle();
+});
+$("#wind").click(function(){
+    $("#windScale").toggle();
+    $("#waveScale").hide();
+    $("#wave-btn").toggle();
+    $("#wind-btn").toggle();
+});
+$("#angleRight").click(function(){
+    $("#windScale").toggle();
+    $("#wind-btn").toggleClass("open");
+    $("#wind-btn").toggle();
+});*/
+
+//浪等级图片显示
+$("#wave-btn").click(function(){
+    $("#waveScale").toggleClass("open");
+    $("#waveScale").toggle();
+    $("#wave-btn").toggleClass("open");
+    $("#wave-btn").toggle();
+});
+$("#wave").click(function(){
+    $("#waveScale").toggle();
+    $("#windScale").hide();
+    $("#wave-btn").toggle();
+    $("#wind-btn").css("display","none");
+});
+$("#rightAngle").click(function(){
+    $("#waveScale").css("display","none");
+    $("#wave-btn").toggleClass("open");
+    $("#wave-btn").css("display","block");
+});
+
+
+//timeslider 样式显示
   $("#ace-timeSlider-button").click(function(){
       $("#bottomPanel").toggleClass("closeTimeSliderPanel");
       $("#ace-timeSlider-button").css("display","none");

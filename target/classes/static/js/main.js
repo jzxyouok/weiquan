@@ -94,7 +94,7 @@ var extents=[{"flag":1,
                 }
     ];
 var  clickLayer,sr,pictureLayer;
-var map,opLayer=null,loading,query,showLoad;
+var map,opLayer=null,loading,query,showLoad,open;
 var index = 0,t= 0,flag=0;
 require([
         "esri/map",
@@ -167,7 +167,10 @@ require([
        //地图初始化执行的方法
         var p = {};
         map.on("load",function(){
+            //增加船体图片
             getshipmessage();
+            //调用画点划线的方法，台风路径展示
+            //  addPath();
         });
         function getshipmessage(){
             var url="/api/tbjhship/getAllMessages";
@@ -183,34 +186,25 @@ require([
                 }
             });
         }
-        /*map.on("load",function(){
-            //增加船体图片
-            getshipmessage()
-          //  p.mapPoint = map.extent.getCenter();
-          //  addGraphics();
-            //船的视图模式compress
 
-           //调用画点划线的方法，台风路径展示
-          //  addPath();
-        });*/
-        //增加船体图片
+        //增加船体图片的方法
         function addGraphics(evt){
-            // Get a point to place the marker
-           /* var pt = evt.mapPoint;
-            if (!pt) {
-                pt = map.graphics.graphics[0].geometry;
-            }*/
-            // Create marker (picture) symbol
             var lat = evt[0].lat;
             var lon = evt[0].lon;
             p = new esri.geometry.Point(lon,lat,sr);
             console.log("p is",p);
             var  symMarker = createPictureSymbol('/img/boat1.png', 0, 12, 30, 40);
-            var infoTemplate = new InfoTemplate("航行预警","航速: 20km/h<br>航向: 东南<br>大风预警：距离3级大风还有100海里，预计当前船速3分钟内到达风圈<br>" +
-                "大浪预警：距离3级大浪还有200海里，预警当前航速5分钟到达浪圈<br>" +
-                "台风预警：距离台风风眼还有400海里");
-            var pictureGraphic = new Graphic(p, symMarker, null, infoTemplate);
+            var pictureGraphic = new Graphic(p, symMarker, null);
             map.graphics.add(pictureGraphic);
+              map.infoWindow.resize(250,200);
+              map.infoWindow.setTitle("海监船航行预警预报");
+              map.infoWindow.setContent(
+                      "坐标点 : " +lat.toFixed(2) + ", " + lon.toFixed(2) +
+                      "<br>"+"航速: 20km/h<br>航向: 东南<br>大风预警：距离3级大风还有100海里，预计当前船速3分钟内到达风圈<br>" +
+                      "大浪预警：距离3级大浪还有200海里，预警当前航速5分钟到达浪圈<br>" +
+                      "台风预警：距离台风风眼还有400海里"
+              );
+             map.infoWindow.show(p,map.getInfoWindowAnchor(p));
             //注册点击的graphics事件
             dojo.connect(map.graphics, "onClick", function(){
                 //显示船载观测数据窗体
@@ -219,10 +213,10 @@ require([
                 $("#shipobserve").css("display","block");
             });
             //鼠标经过船体事件
-      /*      dojo.connect(map.graphics,"onMouseOver",function(evt){
-                map.infoWindow.setTitle("设备类型:"+evt.mapPoint.x);
-                map.infoWindow.setContent("ceshi");
-            });*/
+            /*      dojo.connect(map.graphics,"onMouseOver",function(evt){
+             map.infoWindow.setTitle("设备类型:"+evt.mapPoint.x);
+             map.infoWindow.setContent("ceshi");
+             });*/
         };
         //pictureSymbol的创建方法
         function createPictureSymbol(url, xOffset, yOffset, xWidth, yHeight) {
@@ -277,6 +271,12 @@ require([
                     }else{
                         //如果是陆地的话，气泡显示经纬度
                         console.log("point"+point.x+point.y);
+                            var latitude = point.x;
+                            var longitude = point.y;
+                            var infotemplate = new InfoTemplate("该点坐标信息","lat/lon : " +latitude.toFixed(2) + ", " + longitude.toFixed(2));
+                            var pictureSymbol =   new PictureMarkerSymbol('/img/typhoon.jpg', 30, 30);
+                            var pictureGraphic = new Graphic(point, pictureSymbol, null,infotemplate);
+                        //    map.graphics.add(pictureGraphic);
                     }
                 }
             }
@@ -293,6 +293,7 @@ require([
         //海平面数据展示
         function setwindObserve(evt){
             $("#winds").css("visibility","visible");
+
             var observed = $("#windObserved");//数据窗体
             if (!observed.data("kendoWindow")) {
                 observed.kendoWindow({
@@ -309,6 +310,7 @@ require([
         //海浪数据弹窗展示
         function setShipObservedWin(evt){
             $("#ship").css("visibility","visible");
+
             console.log("setshipObservedWin");
             var observed = $("#shipObserved");//数据窗体
             if (!observed.data("kendoWindow")) {
@@ -326,6 +328,7 @@ require([
         //海流数据弹窗展示
         function setflowObserver(evt){
             $("#sflow").css("visibility","visible");
+
             var observed = $("#wflow");//数据窗体
             if (!observed.data("kendoWindow")) {
                 observed.kendoWindow({
@@ -343,6 +346,7 @@ require([
         function  setWaveVisibility(evt){
             console.log("能见度");
             $("#visibile").css("visibility","visible");
+
             var observed = $("#Evisibled");//能见度数据窗体
             if (!observed.data("kendoWindow")) {
                 observed.kendoWindow({
@@ -355,13 +359,13 @@ require([
             //获取船载观测数据
             getObservedData(evt);
             observed.data("kendoWindow").open();//打开window
-        }
+        };
         //数据获取
         function getObservedData(evt){
             //海面风
             $("#chart1").kendoChart({
                 title: {
-                    text: "当前坐标("+evt.x+","+evt.y+")"
+                    text: "当前坐标("+evt.x.toFixed(2)+","+evt.y.toFixed(2)+")"
                 },
                 legend: {
                     position: "bottom"
@@ -425,7 +429,7 @@ require([
                     }
                 },
                 title: {
-                    text: "东海海域单点海浪预报曲线 \n "+"("+evt.x+","+evt.y+")"
+                    text: "东海海域单点海浪预报曲线 \n "+"("+evt.x.toFixed(2)+","+evt.y.toFixed(2)+")"
                 },
                 legend: {
                     position: "top"
@@ -467,7 +471,7 @@ require([
             //海流
             $("#chart3").kendoChart({
                 title: {
-                    text: "海流数据展示 \n"+"("+evt.x+","+evt.y+")"
+                    text: "海流数据展示 \n"+"("+evt.x.toFixed(2)+","+evt.y.toFixed(2)+")"
                 },
                 legend: {
                     position: "bottom"
@@ -529,7 +533,7 @@ require([
                     data: grandSlam
                 },
                 title:{
-                    text:"能见度数据展示 \n"+"("+evt.x+","+evt.y+")"
+                    text:"能见度数据展示 \n"+"("+evt.x.toFixed(2)+","+evt.y.toFixed(2)+")"
                 },
                 legend: {
                     position: "bottom"
@@ -677,7 +681,7 @@ require([
         $("#wind").click(function(){
             console.log("oplayer is"+opLayer);
             //设置loading展示，true为显示
-            showLoad=true;
+            showLoad=true;open=true;
             //设置timeslider的播放title
             var title = "东海海域海面风时间序列"
             $("#timeInfo label").html(title);

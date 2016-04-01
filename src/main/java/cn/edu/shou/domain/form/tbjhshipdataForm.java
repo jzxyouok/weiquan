@@ -5,6 +5,7 @@ package cn.edu.shou.domain.form;
 import lombok.Getter;
 import lombok.Setter;
 
+
 public class tbjhshipdataForm {
     @Setter
     @Getter

@@ -152,8 +152,6 @@ function getWindDir(windDir){
             }
         }
     }
-
-
     return name;
 }
 //加载grid数据
