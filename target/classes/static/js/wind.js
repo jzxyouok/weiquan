@@ -423,3 +423,4 @@ function chkShipObserveType(obj){
     getObservedData(chkValue);
 }
 
+

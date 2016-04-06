@@ -243,6 +243,8 @@ require([
             //单击后获取当前点的坐标值
             var point = evt.mapPoint;
             console.log("point is",point);
+            //调用matchMark方法，获得匹配的mark
+            matchLatAndLon(point);
             map.graphics.clear();
             getshipmessage();
             //添加一个graphic在当前点的位置上
@@ -276,13 +278,78 @@ require([
                             var infotemplate = new InfoTemplate("该点坐标信息","lat/lon : " +latitude.toFixed(2) + ", " + longitude.toFixed(2));
                             var pictureSymbol =   new PictureMarkerSymbol('/img/typhoon.jpg', 30, 30);
                             var pictureGraphic = new Graphic(point, pictureSymbol, null,infotemplate);
-                        //    map.graphics.add(pictureGraphic);
+                        //  map.graphics.add(pictureGraphic);
                     }
                 }
             }
             //查询当前地图的数据信息
            // blockGroupsLyr.queryFeatures(queryParams, getStats, errback);
         };
+        //点击当前点与已有数据的匹配
+        function matchLatAndLon(points){
+            //获取json数据
+            $.ajax({
+                type:"GET",
+                url:"/js/data/LatAndLon.json",
+                success:function(data){
+                    acquireMark(data,points);
+                },
+                error:function(data){
+                    console.log(data);
+                }
+            });
+            function acquireMark(data,points){
+                var obj = new Function("return" + data)();
+                console.log(obj);
+                var i=0 ,j = 0,
+                 pointX = points.x.toFixed(3),//lon117
+                 pointY = points.y.toFixed(3);//lat171
+                console.log(pointX);
+                console.log(pointY);
+                var arrMarks =[];
+                //拿到所有的lon整数部分相等的数据
+                for(i;i<obj.lon.length-1;i++){
+                    var lonParseInt =parseInt(obj.lon[i][0]);
+                    if(lonParseInt==parseInt(pointX)){
+                        console.log("mark is",obj.lon[i][0]);
+                        //匹配最佳的数据位置
+                       if(pointX==obj.lon[i][0]){
+                         arrMarks.push(obj.lon[i][1]);
+                       };
+                       if(obj.lon[i][0]<pointX&&pointX<obj.lon[i+1][0]){
+                           console.log("obj.lon[i][1]",obj.lon[i][1])
+                           arrMarks.push(obj.lon[i][1]);
+                           break;
+                       };
+                       if(obj.lon[i][0]>pointX){
+                           arrMarks.push(obj.lon[i][1]);
+                           break;
+                       }
+                    }
+                }
+                //拿到所有的lat整数部分相等的数据
+                for(j;j<obj.lat.length-1;j++){
+                    var latParseInt = parseInt(obj.lat[j][0]);
+                    if(latParseInt == parseInt(pointY)){
+                        //匹配最佳的数据位置
+                        if(pointY==obj.lat[j][0]){
+                            console.log("obj.lat[i][1]",obj.lat[j][1]);
+                            arrMarks.push(obj.lat[j][1]);
+                        }else if(obj.lat[j][0]<pointY&&pointY<obj.lat[j+1][0]){
+                            console.log("obj.lat[j][1]",obj.lat[j][1]);
+                            arrMarks.push(obj.lat[j][1]);
+                            break;
+                        };
+                        if(obj.lat[j][0]>pointY){
+                            arrMarks.push(obj.lat[j][1]);
+                            break;
+                        }
+                    }
+                }
+                console.log(arrMarks);
+                return arrMarks;
+            }
+        }
         //图层清除
         function removedynamicLayer(op){
             if(flag===1||flag===2||flag===3||flag===4&&flag!=0){

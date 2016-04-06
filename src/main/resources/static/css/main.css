@@ -8,6 +8,9 @@
 /*
 * map view change
 **/
+.dijitRuleLabelH{
+    width: 50px;
+}
 .titlePane>.maximize{
     display: none;
 }
