@@ -4,5 +4,3 @@
 
 ![image](https://github.com/qweqweq/weiquan/blob/master/src/main/resources/static/img/1.jpg)
 
-
-![image](https://github.com/qweqweq/weiquan/blob/master/src/main/resources/static/img/2.jpg)
