@@ -2,20 +2,20 @@
  * Created by Administrator on 2016/1/11.
  */
 var grandSlam = [{
-    "year": "2003",
+    "year": "20日",
     "win": 13,
     "extremum": "MIN: 13",
     "loss": 3
 },{
-    "year": "2004",
+    "year": "23日",
     "win": 22,
     "loss": 1
 },{
-    "year": "2005",
+    "year": "",
     "win": 24,
     "loss": 2
 },{
-    "year": "2006",
+    "year": "26日",
     "win": 27,
     "extremum": "MAX: 27",
     "loss": 1
@@ -24,7 +24,7 @@ var grandSlam = [{
     "win": 26,
     "loss": 1
 },{
-    "year": "2008",
+    "year": "29日",
     "win": 24,
     "loss": 3
 },{
@@ -40,7 +40,7 @@ var grandSlam = [{
     "win": 20,
     "loss": 4
 },{
-    "year": "2012",
+    "year": "29日",
     "win": 19,
     "loss": 3
 }];
@@ -172,6 +172,7 @@ require([
             //调用画点划线的方法，台风路径展示
             //  addPath();
         });
+        //后台获取船的经纬度
         function getshipmessage(){
             var url="/api/tbjhship/getAllMessages";
             $.ajax({
@@ -211,9 +212,10 @@ require([
                 setShipObserve(true);
                 $("#dataType").css("display","block");
                 $("#shipobserve").css("display","block");
+                setboatTypeObserve(true);
             });
             //鼠标经过船体事件
-            /*      dojo.connect(map.graphics,"onMouseOver",function(evt){
+            /* dojo.connect(map.graphics,"onMouseOver",function(evt){
              map.infoWindow.setTitle("设备类型:"+evt.mapPoint.x);
              map.infoWindow.setContent("ceshi");
              });*/
@@ -243,8 +245,6 @@ require([
             //单击后获取当前点的坐标值
             var point = evt.mapPoint;
             console.log("point is",point);
-            //调用matchMark方法，获得匹配的mark
-            matchLatAndLon(point);
             map.graphics.clear();
             getshipmessage();
             //添加一个graphic在当前点的位置上
@@ -288,16 +288,19 @@ require([
         //点击当前点与已有数据的匹配
         function matchLatAndLon(points){
             //获取json数据
+            var result = null;
             $.ajax({
                 type:"GET",
                 url:"/js/data/LatAndLon.json",
+                async:false,
                 success:function(data){
-                    acquireMark(data,points);
+                 result = acquireMark(data,points);
                 },
                 error:function(data){
                     console.log(data);
                 }
             });
+
             function acquireMark(data,points){
                 var obj = new Function("return" + data)();
                 console.log(obj);
@@ -317,7 +320,7 @@ require([
                          arrMarks.push(obj.lon[i][1]);
                        };
                        if(obj.lon[i][0]<pointX&&pointX<obj.lon[i+1][0]){
-                           console.log("obj.lon[i][1]",obj.lon[i][1])
+                           console.log("obj.lon[i][1]",obj.lon[i][1]);
                            arrMarks.push(obj.lon[i][1]);
                            break;
                        };
@@ -346,10 +349,28 @@ require([
                         }
                     }
                 }
-                console.log(arrMarks);
+                console.log(arrMarks);//lon + lat 编号
+                //将arrMarks编号post到后台，读取本地nc文件里的数据
                 return arrMarks;
+             //   postArrMarks(arrMarks[1],arrMarks[0]);
             }
+            return result;
+         /*   function postArrMarks(a,b){
+                $.ajax({
+                    type:"POST",
+                    url:"/api/config/PostCoordinates",
+                    data:{lat:a,lon:b},
+                    success:function(data){
+                        console.log(data);
+                    },
+                    error:function(e){
+                        console.log(e);
+                    }
+                });
+                //将获取到的值显示在前端
+            }*/
         }
+
         //图层清除
         function removedynamicLayer(op){
             if(flag===1||flag===2||flag===3||flag===4&&flag!=0){
@@ -371,7 +392,7 @@ require([
                 });
             };
             //获取数据
-            getObservedData(evt);
+            getObservedData(evt,0);
             observed.data("kendoWindow").open();//打开window
         };
         //海浪数据弹窗展示
@@ -389,7 +410,7 @@ require([
                 });
             };
             //获取船载观测数据
-            getObservedData(evt);
+            getObservedData(evt,0);
             observed.data("kendoWindow").open();//打开window
         };
         //海流数据弹窗展示
@@ -405,8 +426,11 @@ require([
                     title: "海流预报展示"
                 });
             };
+            //调用matchMark方法，获得匹配的mark(A-B)
+            var marks = matchLatAndLon(evt);
+            console.log("marks is ",marks);
             //获取数据
-            getObservedData(evt);
+            getObservedData(evt,marks);
             observed.data("kendoWindow").open();//打开window
         };
         //能见度数据弹窗展示
@@ -424,11 +448,11 @@ require([
                 });
             };
             //获取船载观测数据
-            getObservedData(evt);
+            getObservedData(evt,0);
             observed.data("kendoWindow").open();//打开window
         };
         //数据获取
-        function getObservedData(evt){
+        function getObservedData(evt,marks){
             //海面风
             $("#chart1").kendoChart({
                 title: {
@@ -517,7 +541,7 @@ require([
                 categoryAxis: {
                     field: "year",
                     labels: {
-                        rotation: -90
+                        rotation: 0
                     },
                     crosshair: {
                         visible: true
@@ -536,7 +560,23 @@ require([
                 }
             });
             //海流
+            var chart3 = $.ajax({
+                type:"GET",
+                url:"/api/config/PostCoordinates/"+marks[1]+"/"+marks[0],
+                success:function(data){
+                    console.log(data);
+                },
+                error:function(){
+                    console.log("error")
+                }
+            });
             $("#chart3").kendoChart({
+                dataSource: {
+                    type: "json",
+                    transport: {
+                        read: "/api/config/PostCoordinates/"+marks[1]+"/"+marks[0]
+                    }
+                },
                 title: {
                     text: "海流数据展示 \n"+"("+evt.x.toFixed(2)+","+evt.y.toFixed(2)+")"
                 },

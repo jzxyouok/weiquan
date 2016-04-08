@@ -1,7 +1,7 @@
 [
 	{
 		"country": "Spain",
-		"year": "2008",
+		"year": "29日",
 		"unit": "GWh",
 		"solar": 2578,
 		"hydro": 26112,
@@ -10,7 +10,7 @@
 	},
 	{
 		"country": "Spain",
-		"year": "2006",
+		"year": "26日",
 		"unit": "GWh",
 		"solar": 119,
 		"hydro": 29831,
@@ -19,7 +19,7 @@
 	},
 	{
 		"country": "Spain",
-		"year": "2004",
+		"year": "17日",
 		"unit": "GWh",
 		"solar": 56,
 		"hydro": 34439,
@@ -28,7 +28,7 @@
 	},
 	{
 		"country": "Spain",
-		"year": "2002",
+		"year": "23日",
 		"unit": "GWh",
 		"solar": 30,
 		"hydro": 26270,
@@ -37,7 +37,7 @@
 	},
 	{
 		"country": "Spain",
-		"year": "2000",
+		"year": "20日",
 		"unit": "GWh",
 		"solar": 18,
 		"hydro": 31807,

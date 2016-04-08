@@ -72,6 +72,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/missive/missivePublishToPDF/**")
                 .antMatchers("/api/bgPng/**")
                 .antMatchers("/api/**")
+                .antMatchers("/dijit/**")
                 .antMatchers("/FaxCable/static/**");
     }
 }

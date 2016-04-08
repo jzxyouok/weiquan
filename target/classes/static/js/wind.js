@@ -270,23 +270,17 @@ $("#close").click(function(){
       $("#wind-btn").toggle();
   });*/
 //风力等级图片显示
-/*$("#wind-btn").click(function(){
+$("#wind-btn").click(function(){
     $("#windScale").toggleClass("open");
-    $("#waveScale").toggle();
-    $("#wind-btn").toggleClass("open");
-    $("#wind-btn").toggle();
+    $("#windScale").toggle();
 });
 $("#wind").click(function(){
     $("#windScale").toggle();
     $("#waveScale").hide();
-    $("#wave-btn").toggle();
-    $("#wind-btn").toggle();
 });
 $("#angleRight").click(function(){
-    $("#windScale").toggle();
-    $("#wind-btn").toggleClass("open");
-    $("#wind-btn").toggle();
-});*/
+    $("#windScale").css("display","none");
+});
 
 //浪等级图片显示
 $("#wave-btn").click(function(){
@@ -298,8 +292,8 @@ $("#wave-btn").click(function(){
 $("#wave").click(function(){
     $("#waveScale").toggle();
     $("#windScale").hide();
-    $("#wave-btn").toggle();
-    $("#wind-btn").css("display","none");
+    $("#wave-btn").hide();
+    $("#wind-btn").toggle();
 });
 $("#rightAngle").click(function(){
     $("#waveScale").css("display","none");
@@ -396,7 +390,7 @@ function setShipObserve(open){
     };
     if (!oType.data("kendoWindow")) {
         oType.kendoWindow({
-            width: "200px",
+            width: "260px",
             height:"50px",
             actions: ["Custom", "Minimize", "Close"],
             title: "船载观测类型"
@@ -421,6 +415,70 @@ function chkShipObserveType(obj){
     var chkValue=obj.value;//选择的值
     //获取船载观测数据图表
     getObservedData(chkValue);
+}
+//船的类型数据
+function setboatTypeObserve(open){
+    var observed = $("#boatType");
+    if (!observed.data("kendoWindow")) {
+        observed.kendoWindow({
+            width: "259px",
+            height:"154px",
+            actions: ["Custom", "Minimize", "Close"],
+            title: "船舶类型"
+        });
+    };
+    //获取船的类型数据
+    getBoatType();
+    if(open){
+        observed.data("kendoWindow").open();//打开window
+    }else{
+        observed.data("kendoWindow").close();//关闭window
+    }
+}
+function getBoatType(){
+    $("#treeview").kendoTreeView({
+        checkboxes: {
+            checkChildren: true
+        },
+        check: onCheck,
+        dataSource: [{
+            id: 1, text: "船舶", expanded: true, spriteCssClass: "rootfolder", items: [
+                {
+                    id: 2, text: "近岸", expanded: true, spriteCssClass: "folder", items: [
+                    { id: 3, text: "船1", spriteCssClass: "html" },
+                    { id: 4, text: "船2", spriteCssClass: "html" },
+                    { id: 5, text: "船3", spriteCssClass: "image" }
+                ]
+                },
+                {
+                    id: 6, text: "远洋", expanded: true, spriteCssClass: "folder", items: [
+                    { id: 7, text: "船1", spriteCssClass: "image" },
+                    { id: 8, text: "船2", spriteCssClass: "pdf" },
+                ]
+                }
+            ]
+        }]
+    });
+};
+function checkedNodeIds(nodes, checkedNodes) {
+    for (var i = 0; i < nodes.length; i++) {
+        if (nodes[i].checked) {
+            checkedNodes.push(nodes[i].id);
+        }
+        if (nodes[i].hasChildren) {
+            checkedNodeIds(nodes[i].children.view(), checkedNodes);
+        }
+    }
+}
+function onCheck() {
+    var checkedNodes = [],message,
+        treeView = $("#treeview").data("kendoTreeView");
+    checkedNodeIds(treeView.dataSource.view(), checkedNodes);
+    if (checkedNodes.length > 0) {
+        message = "IDs of checked nodes: " + checkedNodes.join(",");
+    } else {
+        message = "No nodes checked.";
+    }
 }
 
 
