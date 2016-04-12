@@ -94,7 +94,7 @@ var extents=[{"flag":1,
                 }
     ];
 var  clickLayer,sr,pictureLayer;
-var map,opLayer=null,loading,query,showLoad,open;
+var map,opLayer=null,loading,query,showLoad,open,boatindex=0;
 var index = 0,t= 0,flag=0;
 require([
         "esri/map",
@@ -180,18 +180,90 @@ require([
                 url:url,
                 success:function(data){
                     console.log("data is get success",data);
-                    addGraphics(data);
+                    for(var i =0;i<=boatindex;i++){
+                        addGraphics(data,i);
+                    }
                 },
                 error:function(data){
                     console.log(data);
                 }
             });
         }
+        //船的类型数据
+        function setboatTypeObserve(open){
+            var observed = $("#boatType");
+            if (!observed.data("kendoWindow")) {
+                observed.kendoWindow({
+                    width: "259px",
+                    height:"154px",
+                    actions: ["Custom", "Minimize", "Close"],
+                    title: "船舶类型"
+                });
+            };
+            $("#treeview").css("display","block");
+            if(open){
+                observed.data("kendoWindow").open();//打开window
+            }else{
+                observed.data("kendoWindow").close();//关闭window
+            }
+        }
+        $("#treeview").kendoTreeView({
+            checkboxes: {
+                checkChildren: true
+            },
+            check: onCheck,
+            dataSource: [
+                { id:1,text: "近岸", expanded: true,items: [
+                    {id:2 ,text: "中国海船 7021" },
+                    { id:3,text: "中国海船 7021" },
+                    {id:4, text: "中国海船 7021" }
+                ] },
+                { id:5,text: "远洋", expanded: true, items: [
+                    {id:6, text: "中国海船 7022" },
+                    {id:7, text: "中国海船 7022" },
+                    {id:8, text: "中国海船 7022" }
+                ] }
+            ]
+        });
+        // function that gathers IDs of checked nodes
+        function checkedNodeIds(nodes, checkedNodes) {
+            for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].checked) {
+                    checkedNodes.push(nodes[i].id);
+                }
 
+                if (nodes[i].hasChildren) {
+                    checkedNodeIds(nodes[i].children.view(), checkedNodes);
+                }
+            }
+        }
+        // show checked node IDs on datasource change
+        function onCheck() {
+            var checkedNodes = [],
+                treeView = $("#treeview").data("kendoTreeView"),
+                message;
+            checkedNodeIds(treeView.dataSource.view(), checkedNodes);
+            if (checkedNodes.length > 0) {
+                message = checkedNodes.join(",");
+                console.log(message[0])
+                if(message[0]==1){
+                    boatindex=3;
+                    getshipmessage();
+                }else if(message[0]==2||message[0]==3||message[0]==4){
+                    map.graphics.clear();
+                    boatindex=2;
+                    getshipmessage();
+                }
+            } else {
+                map.graphics.clear();
+                message = "No nodes checked.";
+            }
+            console.log("message"+message);
+        }
         //增加船体图片的方法
-        function addGraphics(evt){
-            var lat = evt[0].lat;
-            var lon = evt[0].lon;
+        function addGraphics(evt,i){
+            var lat = evt[i].lat;
+            var lon = evt[i].lon;
             p = new esri.geometry.Point(lon,lat,sr);
             console.log("p is",p);
             var  symMarker = createPictureSymbol('/img/boat1.png', 0, 12, 30, 40);
@@ -205,14 +277,16 @@ require([
                       "大浪预警：距离3级大浪还有200海里，预警当前航速5分钟到达浪圈<br>" +
                       "台风预警：距离台风风眼还有400海里"
               );
-             map.infoWindow.show(p,map.getInfoWindowAnchor(p));
+            // map.infoWindow.show(p,map.getInfoWindowAnchor(p));
             //注册点击的graphics事件
             dojo.connect(map.graphics, "onClick", function(){
                 //显示船载观测数据窗体
                 setShipObserve(true);
                 $("#dataType").css("display","block");
                 $("#shipobserve").css("display","block");
+                //船的数据类型
                 setboatTypeObserve(true);
+
             });
             //鼠标经过船体事件
             /* dojo.connect(map.graphics,"onMouseOver",function(evt){
