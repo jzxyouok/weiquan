@@ -457,8 +457,16 @@ require([
         };
         //海平面数据展示
         function setwindObserve(evt){
+            if( $("#shipObserved").data("kendoWindow")){
+                $("#shipObserved").data("kendoWindow").close();
+            }
+            if($("#wflow").data("kendoWindow")){
+                $("#wflow").data("kendoWindow").close();
+            }
+            if($("#Evisibled").data("kendoWindow")){
+                $("#Evisibled").data("kendoWindow").close();
+            }
             $("#winds").css("visibility","visible");
-
             var observed = $("#windObserved");//数据窗体
             if (!observed.data("kendoWindow")) {
                 observed.kendoWindow({
@@ -474,8 +482,16 @@ require([
         };
         //海浪数据弹窗展示
         function setShipObservedWin(evt){
+            if(  $("#windObserved").data("kendoWindow")){
+                $("#windObserved").data("kendoWindow").close();
+            }
+            if($("#wflow").data("kendoWindow")){
+                $("#wflow").data("kendoWindow").close();
+            }
+            if($("#Evisibled").data("kendoWindow")){
+                $("#Evisibled").data("kendoWindow").close();
+            }
             $("#ship").css("visibility","visible");
-
             console.log("setshipObservedWin");
             var observed = $("#shipObserved");//数据窗体
             if (!observed.data("kendoWindow")) {
@@ -492,8 +508,16 @@ require([
         };
         //海流数据弹窗展示
         function setflowObserver(evt){
+            if($("#windObserved").data("kendoWindow")){
+                $("#windObserved").data("kendoWindow").close();
+            }
+            if( $("#shipObserved").data("kendoWindow")){
+                $("#shipObserved").data("kendoWindow").close();
+            }
+            if( $("#Evisibled").data("kendoWindow")){
+                $("#Evisibled").data("kendoWindow").close();
+            }
             $("#sflow").css("visibility","visible");
-
             var observed = $("#wflow");//数据窗体
             if (!observed.data("kendoWindow")) {
                 observed.kendoWindow({
@@ -512,9 +536,17 @@ require([
         };
         //能见度数据弹窗展示
         function  setWaveVisibility(evt){
-            console.log("能见度");
+            //关闭其他窗体
+            if($("#windObserved").data("kendoWindow")){
+                $("#windObserved").data("kendoWindow").close();
+            }
+            if( $("#shipObserved").data("kendoWindow")){
+                $("#shipObserved").data("kendoWindow").close();
+            }
+            if($("#wflow").data("kendoWindow")){
+                $("#wflow").data("kendoWindow").close();
+            }
             $("#visibile").css("visibility","visible");
-
             var observed = $("#Evisibled");//能见度数据窗体
             if (!observed.data("kendoWindow")) {
                 observed.kendoWindow({
@@ -638,25 +670,25 @@ require([
                 }
             });
             //海流
-            var chart3 = $.ajax({
+           /* var chart3 = $.ajax({
                 type:"GET",
-                url:"/api/config/PostCoordinates/"+marks[1]+"/"+marks[0],
+                url:"/api/config/PostOFTCoordinates/"+marks[1]+"/"+marks[0],
                 success:function(data){
                     console.log("hailiu data"+data);
                 },
                 error:function(){
                     console.log("error")
                 }
-            });
+            });*/
             $("#chart3").kendoChart({
                 dataSource: {
                     type: "json",
                     transport: {
-                        read: "/api/config/PostCoordinates/"+marks[1]+"/"+marks[0]
+                        read: "/api/config/PostOFTCoordinates/"+marks[1]+"/"+marks[0]
                     }
                 },
                 title: {
-                    text: "流速流向图"
+                    text: "流速流向图 \n("+evt.x.toFixed(2)+","+evt.y.toFixed(2)+")"
                 },
                 legend: {
                     position: "bottom"

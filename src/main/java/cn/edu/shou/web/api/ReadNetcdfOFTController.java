@@ -38,17 +38,32 @@ public class ReadNetcdfOFTController {
             Variable varv10 = ncfile.findVariable(variable10);
 
             if (null != varu10 && null != varv10) {
+                //未来三天U的值
                 List ranges = new ArrayList();
-                ranges.add(new Range(0,100,30));
-                ranges.add(new Range(0,0));
-                ranges.add(new Range(0,105,1));
+                ranges.add(new Range(0,432,10));//时间维度，一共720个时刻，取未来3天的时刻，跨度为10
+                ranges.add(new Range(0,0));//layer的维度
+                ranges.add(new Range(lat,lat,1));//nodes，网格的数据
                 Array data2D =varu10.read(ranges).reduce();
-                for(int i = 0;i<30;i++){
+                //未来3天V的值
+                List rangeLon = new ArrayList();
+                rangeLon.add(new Range(0,432,10));
+                rangeLon.add(new Range(0,0));
+                rangeLon.add(new Range(lon,lon,1));
+                Array dataV =varu10.read(ranges).reduce();
+                System.out.println("dataV"+dataV);
+                for(int i = 0;i<44;i++){
                     Map<String,String> map =new HashMap();
-                    Double netcdfSqrt = Math.sqrt((Math.pow(data2D.getDouble(i), 2) + Math.pow(data2D.getDouble(i+1), 2)));
-                    System.out.println("netcdfsqrt"+netcdfSqrt);
+                    Double windDir=null;
+                    Double netcdfSqrt = Math.sqrt((Math.pow(data2D.getDouble(i), 2) + Math.pow(dataV.getDouble(i), 2)));
+                    System.out.println("netcdfWaveSqrt"+netcdfSqrt);
                     map.put("windSpeed", netcdfSqrt.toString());
-                    map.put("windDir", netcdfSqrt.toString());
+                    if(data2D.getDouble(i) > 0)
+                        windDir=((180 / Math.PI) * Math.atan(data2D.getDouble(i)/dataV.getDouble(i)) + 180);
+                    if(data2D.getDouble(i) < 0 & dataV.getDouble(i) < 0)
+                        windDir= ((180 / Math.PI) * Math.atan(data2D.getDouble(i)/dataV.getDouble(i)) + 0);
+                    if(data2D.getDouble(i) > 0 & dataV.getDouble(i) < 0)
+                        windDir=((180 / Math.PI) * Math.atan(data2D.getDouble(i)/dataV.getDouble(i)) + 360);
+                    map.put("windDir", windDir.toString());
                     list.add(map);
                 }
             }
