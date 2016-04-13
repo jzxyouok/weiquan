@@ -158,8 +158,8 @@ require([
             new Color([0,255,0,1]));
         var buffSymbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
             new SimpleLineSymbol(SimpleLineSymbol.STYLE_LONGDASHDOT,
-                new Color([255,128,0,1]), 3),
-            new Color([255,128,0,0.15]));
+                new Color([0,0,0,1]), 3),
+            new Color([34,96,170,0.15]));
         //航线变量定义
         var totalDistance = 0, inputPoints = [], legDistance = [], enableMeasureLength = false;
         //量算服务
@@ -256,7 +256,6 @@ require([
                 }
             } else {
                 map.graphics.clear();
-                message = "No nodes checked.";
             }
             console.log("message"+message);
         }
@@ -269,6 +268,7 @@ require([
             var  symMarker = createPictureSymbol('/img/boat1.png', 0, 12, 30, 40);
             var pictureGraphic = new Graphic(p, symMarker, null);
             map.graphics.add(pictureGraphic);
+            //气泡
               map.infoWindow.resize(250,200);
               map.infoWindow.setTitle("海监船航行预警预报");
               map.infoWindow.setContent(
@@ -277,9 +277,13 @@ require([
                       "大浪预警：距离3级大浪还有200海里，预警当前航速5分钟到达浪圈<br>" +
                       "台风预警：距离台风风眼还有400海里"
               );
-            // map.infoWindow.show(p,map.getInfoWindowAnchor(p));
+            map.infoWindow.show(p,map.getInfoWindowAnchor(p));
             //注册点击的graphics事件
             dojo.connect(map.graphics, "onClick", function(){
+                //添加一个半径当前点
+                var buffer = geometryEngine.geodesicBuffer(p, 10, "miles");
+                var bufferGraphic = new Graphic(buffer, buffSymbol);
+                map.graphics.add(bufferGraphic);
                 //显示船载观测数据窗体
                 setShipObserve(true);
                 $("#dataType").css("display","block");
@@ -289,10 +293,12 @@ require([
 
             });
             //鼠标经过船体事件
-            /* dojo.connect(map.graphics,"onMouseOver",function(evt){
-             map.infoWindow.setTitle("设备类型:"+evt.mapPoint.x);
-             map.infoWindow.setContent("ceshi");
-             });*/
+            dojo.connect(map.graphics,"onMouseOver",function(){
+                 map.infoWindow.setTitle("船的位置及编号:");
+                 map.infoWindow.setContent("位置坐标："+ p.x+ p.y+"<br>"+
+                     "船的编号"+evt[i].shipid);
+                map.infoWindow.show(p,map.getInfoWindowAnchor(p));
+             });
         };
         //pictureSymbol的创建方法
         function createPictureSymbol(url, xOffset, yOffset, xWidth, yHeight) {
@@ -324,10 +330,7 @@ require([
             //添加一个graphic在当前点的位置上
             var ptGraphic = new Graphic(point, pointSymbol);
             map.graphics.add(ptGraphic);
-            //添加一个半径当前点
-            var buffer = geometryEngine.geodesicBuffer(point, 10, "miles");
-            var bufferGraphic = new Graphic(buffer, buffSymbol);
-            map.graphics.add(bufferGraphic);
+
             for(var i in extents){
                 if(i == (flag-1) && flag==extents[i].flag){
                     //判断当前点是否是陆地
@@ -527,6 +530,7 @@ require([
         };
         //数据获取
         function getObservedData(evt,marks){
+
             //海面风
             $("#chart1").kendoChart({
                 title: {
@@ -638,7 +642,7 @@ require([
                 type:"GET",
                 url:"/api/config/PostCoordinates/"+marks[1]+"/"+marks[0],
                 success:function(data){
-                    console.log(data);
+                    console.log("hailiu data"+data);
                 },
                 error:function(){
                     console.log("error")
@@ -652,60 +656,60 @@ require([
                     }
                 },
                 title: {
-                    text: "海流数据展示 \n"+"("+evt.x.toFixed(2)+","+evt.y.toFixed(2)+")"
+                    text: "流速流向图"
                 },
                 legend: {
                     position: "bottom"
                 },
-                series: [{
+                chartArea: {
+                    background: ""
+                },
+                seriesDefaults: {
                     type: "line",
-                    data: [6, 10, 10, 10, 10, 9, 5, 5, 10, 8, 8, 5, 8, 11, 9, 15, 20, 23, 24, 21, 21, 20, 22, 22, 20, 18, 16, 15, 20, 13.2, 18],
-                    name: "海流最大值",
-                    color: "#ff1c1c",
-                    axis: "temp"
-                }, {
-                    type: "line",
-                    data: [-5, -6, 0, -4, -3, -5.2, -5, -1.7, -1, 0, -0.4, -2, -2, -5, 4, -2, -4, -1, -1, 2, 4, -1, 1, 1, 4, 0, -1, 1, -2, 5.7, 5],
-                    name: "海流最小值",
-                    color: "#ffae00",
-                    axis: "temp"
-                }, {
-                    type: "area",
-                    data: [16.4, 21.7, 35.4, 19, 10.9, 13.6, 10.9, 10.9, 10.9, 16.4, 16.4, 13.6, 13.6, 29.9, 27.1, 16.4, 13.6, 10.9, 16.4, 10.9, 24.5, 10.9, 8.1, 19, 21.7, 27.1, 24.5, 16.4, 27.1, 29.9, 27.1],
-                    name: "海流流速",
-                    color: "#73c100",
-                    axis: "wind"
-                }, {
-                    type: "area",
-                    data: [5.4, 2, 5.4, 3, 2, 1, 3.2, 7.4, 0, 8.2, 0, 1.8, 0.3, 0, 0, 2.3, 0, 3.7, 5.2, 6.5, 0, 7.1, 0, 4.7, 0, 1.8, 0, 0, 0, 1.5, 0.8],
-                    name: "海流平均流速",
-                    color: "#007eff",
-                    axis: "rain"
-                }],
-                valueAxes: [{
-                    name: "rain",
-                    color: "#007eff",
-                    min: 0,
-                    max: 60
-                }, {
-                    name: "wind",
-                    color: "#73c100",
-                    min: 0,
-                    max: 60
-                }, {
-                    name: "temp",
-                    min: -30,
-                    max: 30
-                }],
+                    style: "smooth"
+                },
+                series: [
+                    {
+                        name: "流速流向",
+                        field:"windspeed",
+                        markers: {
+                            size: 15,
+                            visual: function (e) {
+                                //根据风向加载相对应的风向图片
+                                var winddir=getWindDir(e.dataItem.winddir);
+                                var src = kendo.format("/img/ships/{0}", winddir);
+                                var image = new kendo.drawing.Image(src, e.rect);
+                                return image;
+                            }
+                        }
+
+                    }
+                ],
+                valueAxis: {
+                    labels: {
+                        format: "{0}m/s"
+                    },
+                    line: {
+                        visible: true
+                    },
+                    axisCrossingValue: -10
+                },
                 categoryAxis: {
-                    categories: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"],
-                    axisCrossingValues: [32, 32, 0],
-                    justified: true
+                    categories: ["8时", "", "", "12时", "", "", "14时", "", "", "","","16时","","","","","20时","","","","","22时","","","","","24时","","","",""],
+                    majorGridLines: {
+                        visible: false
+                    },
+                    labels: {
+                        rotation: 0
+                    },
+                    crosshair: {
+                        visible: true
+                    }
                 },
                 tooltip: {
                     visible: true,
-                    format: "{0}",
-                    template: "#= category #/03: #= value #"
+                    format: "{0}%",
+                    template: "#= series.name #: #= value #"
                 }
             });
             //能见度
