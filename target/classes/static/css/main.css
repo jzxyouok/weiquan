@@ -8,6 +8,26 @@
 /*
 * map view change
 **/
+#day1{
+    position: relative;
+    margin-top: -22px;
+    margin-left: 82px;
+}
+#day2{
+    position: relative;
+    margin-top: -28px;
+    margin-left: 258px;
+}
+#day3{
+    position: relative;
+    margin-top: -28px;
+    margin-left: 450px;
+}
+#day4{
+    position: relative;
+    margin-top: -30px;
+    margin-left: 600px;
+}
 .dijitRuleLabelH{
     width: 50px;
 }

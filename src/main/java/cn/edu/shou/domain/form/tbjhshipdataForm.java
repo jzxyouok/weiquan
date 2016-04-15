@@ -25,6 +25,8 @@ public class tbjhshipdataForm {
     @Setter @Getter
     private String obDate;//观测日期
 
+    @Setter @Getter
+    private String obminute;//
 
     public int getId() {
         return id;
@@ -88,6 +90,14 @@ public class tbjhshipdataForm {
 
     public void setObDate(String obDate) {
         this.obDate = obDate;
+    }
+
+    public String getObminute() {
+        return obminute;
+    }
+
+    public void setObminute(String obminute) {
+        this.obminute = obminute;
     }
 }
 

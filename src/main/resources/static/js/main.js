@@ -531,9 +531,93 @@ require([
             var marks = matchLatAndLon(evt);
             console.log("marks is ",marks);
             //获取数据
-            getObservedData(evt,marks);
+            getWaveflowData(evt,marks);
             observed.data("kendoWindow").open();//打开window
         };
+        //海流数据获取
+        function getWaveflowData(evt,marks){
+            //日期的获取
+            $.ajax({
+                type:"GET",
+                url:"/api/config/PostOFTCoordinates/"+marks[1]+"/"+marks[0],
+                success:function(data){
+                    console.log("hailiu data"+data[0].dates);
+                    $("#day1").text(data[0].dates);
+                    $("#day2").text(data[13].dates);
+                    $("#day3").text(data[26].dates);
+                    $("#day4").text(data[39].dates);
+                },
+                error:function(){
+                    console.log("error")
+                }
+            });
+            //图表展示
+            $("#chart3").kendoChart({
+                dataSource: {
+                    type: "json",
+                    transport: {
+                        read: "/api/config/PostOFTCoordinates/"+marks[1]+"/"+marks[0]
+                    }
+                },
+                title: {
+                    text: "流速流向图 \n("+evt.x.toFixed(2)+","+evt.y.toFixed(2)+")"
+                },
+                legend: {
+                    position: "bottom"
+                },
+                chartArea: {
+                    background: ""
+                },
+                seriesDefaults: {
+                    type: "line",
+                    style: "smooth"
+                },
+                series: [
+                    {
+                        name: "流速流向",
+                        field:"windspeed",
+                        markers: {
+                            size: 15,
+                            visual: function (e) {
+                                //根据风向加载相对应的风向图片
+                                var winddir=getWindDir(e.dataItem.winddir);
+                                var src = kendo.format("/img/ships/{0}", winddir);
+                                var image = new kendo.drawing.Image(src, e.rect);
+                                return image;
+                            }
+                        }
+                    }
+                ],
+                valueAxis: {
+                    labels: {
+                        format: "{0}m/s"
+                    },
+                    line: {
+                        visible: true
+                    },
+                    axisCrossingValue: -10
+                },
+                categoryAxis: {
+                    field:"watertemp",
+                    majorGridLines: {
+                        visible: false
+                    },
+                    labels: {
+                        rotation: 0,
+                        step:4,
+                        format:"{0}/时"
+                    },
+                    crosshair: {
+                        visible: true
+                    }
+                },
+                tooltip: {
+                    visible: true,
+                    format: "{0}%",
+                    template: "#= series.name #: #= value #"
+                }
+            });
+        }
         //能见度数据弹窗展示
         function  setWaveVisibility(evt){
             //关闭其他窗体
@@ -562,7 +646,6 @@ require([
         };
         //数据获取
         function getObservedData(evt,marks){
-
             //海面风
             $("#chart1").kendoChart({
                 title: {
@@ -667,81 +750,6 @@ require([
                     visible: true,
                     shared: true,
                     format: "N0"
-                }
-            });
-            //海流
-           /* var chart3 = $.ajax({
-                type:"GET",
-                url:"/api/config/PostOFTCoordinates/"+marks[1]+"/"+marks[0],
-                success:function(data){
-                    console.log("hailiu data"+data);
-                },
-                error:function(){
-                    console.log("error")
-                }
-            });*/
-            $("#chart3").kendoChart({
-                dataSource: {
-                    type: "json",
-                    transport: {
-                        read: "/api/config/PostOFTCoordinates/"+marks[1]+"/"+marks[0]
-                    }
-                },
-                title: {
-                    text: "流速流向图 \n("+evt.x.toFixed(2)+","+evt.y.toFixed(2)+")"
-                },
-                legend: {
-                    position: "bottom"
-                },
-                chartArea: {
-                    background: ""
-                },
-                seriesDefaults: {
-                    type: "line",
-                    style: "smooth"
-                },
-                series: [
-                    {
-                        name: "流速流向",
-                        field:"windspeed",
-                        markers: {
-                            size: 15,
-                            visual: function (e) {
-                                //根据风向加载相对应的风向图片
-                                var winddir=getWindDir(e.dataItem.winddir);
-                                var src = kendo.format("/img/ships/{0}", winddir);
-                                var image = new kendo.drawing.Image(src, e.rect);
-                                return image;
-                            }
-                        }
-
-                    }
-                ],
-                valueAxis: {
-                    labels: {
-                        format: "{0}m/s"
-                    },
-                    line: {
-                        visible: true
-                    },
-                    axisCrossingValue: -10
-                },
-                categoryAxis: {
-                    categories: ["8时", "", "", "12时", "", "", "14时", "", "", "","","16时","","","","","20时","","","","","22时","","","","","24时","","","",""],
-                    majorGridLines: {
-                        visible: false
-                    },
-                    labels: {
-                        rotation: 0
-                    },
-                    crosshair: {
-                        visible: true
-                    }
-                },
-                tooltip: {
-                    visible: true,
-                    format: "{0}%",
-                    template: "#= series.name #: #= value #"
                 }
             });
             //能见度
@@ -1113,7 +1121,7 @@ require([
             });
         }
     });
-//台风路径展示方法(这个方法必须在require外面，否则settimeout方法调用失效)
+//台风路径展示方法(这个方法必须在require外面，否则settimeout方法调用失效
 function addPath(){
     require([
         "esri/geometry/Circle",

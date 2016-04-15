@@ -27,15 +27,21 @@ public class tbjhshipdata {
     private float cwindspeed;//c风速
     @Setter @Getter
     private float cwinddir;//c风向
+
     @Setter @Getter
     private float watertemp;//水温
     @Setter @Getter
     private float airpressure;//气压
+    @Setter @Getter
+    private String dates;//日期
+
+    @Setter @Getter
+    private  String obminute;//字段切割
+
     @ManyToOne(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     @JoinColumn(name = "tbjhshipid")
     @JsonManagedReference
     public cn.edu.shou.domain.tbjhship tbjhship;
-
 
     public int getId() {
         return id;
@@ -85,6 +91,7 @@ public class tbjhshipdata {
         this.watertemp = watertemp;
     }
 
+
     public float getAirpressure() {
         return airpressure;
     }
@@ -99,5 +106,21 @@ public class tbjhshipdata {
 
     public void setTbjhship(tbjhship tbjhship) {
         this.tbjhship = tbjhship;
+    }
+
+    public String getDates() {
+        return dates;
+    }
+
+    public void setDates(String dates) {
+        this.dates = dates;
+    }
+
+    public String getObminute() {
+        return obminute;
+    }
+
+    public void setObminute(String obminute) {
+        this.obminute = obminute;
     }
 }

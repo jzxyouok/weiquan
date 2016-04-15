@@ -42,7 +42,7 @@ public class tbjhship {
 
     public void setShipid(String shipid) {
         this.shipid = shipid;
-    }
+}
 
     public Timestamp getObdate() {
         return obdate;

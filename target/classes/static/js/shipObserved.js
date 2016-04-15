@@ -53,12 +53,14 @@ function airPressureChart(){
             axisCrossingValue: -10
         },
         categoryAxis: {
-            categories: ["", "40分", "", "", "", "", "35分", "", "", "","","30分","","","","","25分","","","","","20分","","","","","15分","","","",""],
+            field:"obminute",
             majorGridLines: {
                 visible: false
             },
             labels: {
-                rotation: 0
+                rotation: 0,
+                step:5,
+                format:"{0}"
             },
             crosshair: {
                 visible: true
@@ -120,13 +122,16 @@ function windChart(){
             axisCrossingValue: -10
         },
         categoryAxis: {
-            categories: ["", "40分", "", "", "", "", "35分", "", "", "","","30分","","","","","25分","","","","","20分","","","","","15分","","","",""],
+           // categories: ["", "40分", "", "", "", "", "35分", "", "", "","","30分","","","","","25分","","","","","20分","","","","","15分","","","",""],
+            field:"obminute",
             majorGridLines: {
                 visible: false
             },
             justified: false,
             labels: {
-                rotation: 0
+                rotation: 0,
+                step:5,
+                format:"{0}"
             },
             crosshair: {
                 visible: true
