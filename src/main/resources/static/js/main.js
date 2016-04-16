@@ -903,6 +903,29 @@ require([
             }
         };
         //卫星遥感数据的
+        $("#stalite").click(function(){
+            $.ajax({
+                type:"GET",
+                url:"/js/data/LatAndLon.json",
+                async:false,
+                success:function(data){
+                  var obj = new Function("return" + data)();
+                   console.log(obj.u);
+                   getUVsqrt(obj.u,obj.v);
+                },
+                error:function(data){
+                    console.log(data);
+                }
+            });
+        });
+        function getUVsqrt(u,v){
+            var result;
+            for(var i =0;i< u.length;i++){
+                result=Math.sqrt(Math.pow(u[i],2)+Math.pow(v[i],2));
+                console.log("sqrt result is "+result);
+            }
+
+        };
         //海面风数据加载
         $("#wind").click(function(){
             console.log("oplayer is"+opLayer);
