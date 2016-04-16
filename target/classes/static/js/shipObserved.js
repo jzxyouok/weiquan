@@ -122,7 +122,6 @@ function windChart(){
             axisCrossingValue: -10
         },
         categoryAxis: {
-           // categories: ["", "40分", "", "", "", "", "35分", "", "", "","","30分","","","","","25分","","","","","20分","","","","","15分","","","",""],
             field:"obminute",
             majorGridLines: {
                 visible: false

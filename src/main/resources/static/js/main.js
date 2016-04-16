@@ -902,13 +902,14 @@ require([
                 });
             }
         };
+        //卫星遥感数据的
         //海面风数据加载
         $("#wind").click(function(){
             console.log("oplayer is"+opLayer);
             //设置loading展示，true为显示
             showLoad=true;open=true;
             //设置timeslider的播放title
-            var title = "东海海域海面风时间序列"
+            var title = "东海海域海面风时间序列";
             $("#timeInfo label").html(title);
              if(opLayer!=null){
                  removedynamicLayer(opLayer);
@@ -926,7 +927,7 @@ require([
         //海浪的数据加载
         $("#wave").click(function(){
             showLoad=true;
-            var title = "东海海域海浪时间序列"
+            var title = "东海海域海浪时间序列";
             $("#timeInfo label").html(title);
             if(opLayer!=null){
                 removedynamicLayer(opLayer);
@@ -947,7 +948,7 @@ require([
         $("#waveflow").click(function(){
             console.log("oplayer is"+opLayer);
             showLoad=true;
-            var title = "东海海域海流时间序列"
+            var title = "东海海域海流时间序列";
             $("#timeInfo label").html(title);
             if(opLayer!=null){
                 removedynamicLayer(opLayer);
@@ -967,7 +968,7 @@ require([
         //能见度数据加载
         $("#visibility").click(function(){
             showLoad=true;
-            var title = "东海海域能见度时间序列"
+            var title = "东海海域能见度时间序列";
             $("#timeInfo label").html(title);
             console.log("oplayer is"+opLayer);
             if(opLayer!=null){
