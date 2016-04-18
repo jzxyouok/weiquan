@@ -180,14 +180,26 @@ require([
                 url:url,
                 success:function(data){
                     console.log("data is get success",data);
-                    for(var i =0;i<=boatindex;i++){
-                        addGraphics(data,i);
-                    }
+                    //控制船的显示
+                    boatShowIndex(data);
                 },
                 error:function(data){
                     console.log(data);
                 }
             });
+        }
+        function boatShowIndex(data){
+            if(boatindex==0){
+                addGraphics(data,boatindex);
+            }else{
+                if(boatindex==3){
+                    addGraphics(data,3)
+                }
+                if(boatindex==2){
+                    addGraphics(data,2);
+                }
+
+            }
         }
         //船的类型数据
         function setboatTypeObserve(open){
@@ -261,23 +273,28 @@ require([
         }
         //增加船体图片的方法
         function addGraphics(evt,i){
+
             var lat = evt[i].lat;
             var lon = evt[i].lon;
             p = new esri.geometry.Point(lon,lat,sr);
-            console.log("p is",p);
+
             var  symMarker = createPictureSymbol('/img/boat1.png', 0, 12, 30, 40);
             var pictureGraphic = new Graphic(p, symMarker, null);
             map.graphics.add(pictureGraphic);
-            //气泡
-              map.infoWindow.resize(250,200);
-              map.infoWindow.setTitle("海监船航行预警预报");
-              map.infoWindow.setContent(
-                      "坐标点 : " +lat.toFixed(2) + ", " + lon.toFixed(2) +
-                      "<br>"+"航速: 20km/h<br>航向: 东南<br>大风预警：距离3级大风还有100海里，预计当前船速3分钟内到达风圈<br>" +
-                      "大浪预警：距离3级大浪还有200海里，预警当前航速5分钟到达浪圈<br>" +
-                      "台风预警：距离台风风眼还有400海里"
-              );
-            map.infoWindow.show(p,map.getInfoWindowAnchor(p));
+            popwindow();
+            function popwindow(){
+                //气泡
+                map.infoWindow.resize(250,200);
+                map.infoWindow.setTitle("海监船航行预警预报");
+                map.infoWindow.setContent(
+                        "坐标点 : " +lat.toFixed(2) + ", " + lon.toFixed(2) +
+                        "<br>"+"航速: 20km/h<br>航向: 东南<br>大风预警：距离3级大风还有100海里，预计当前船速3分钟内到达风圈<br>" +
+                        "大浪预警：距离3级大浪还有200海里，预警当前航速5分钟到达浪圈<br>" +
+                        "台风预警：距离台风风眼还有400海里"
+                );
+                map.infoWindow.show(p,map.getInfoWindowAnchor(p));
+            }
+
             //注册点击的graphics事件
             dojo.connect(map.graphics, "onClick", function(){
                 //添加一个半径当前点
@@ -297,6 +314,7 @@ require([
                  map.infoWindow.setTitle("船的位置及编号:");
                  map.infoWindow.setContent("位置坐标："+ p.x+ p.y+"<br>"+
                      "船的编号"+evt[i].shipid);
+
                 map.infoWindow.show(p,map.getInfoWindowAnchor(p));
              });
         };
