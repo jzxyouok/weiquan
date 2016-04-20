@@ -1,49 +1,6 @@
 /**
  * Created by Administrator on 2016/1/11.
  */
-var grandSlam = [{
-    "year": "20日",
-    "win": 13,
-    "extremum": "MIN: 13",
-    "loss": 3
-},{
-    "year": "23日",
-    "win": 22,
-    "loss": 1
-},{
-    "year": "",
-    "win": 24,
-    "loss": 2
-},{
-    "year": "26日",
-    "win": 27,
-    "extremum": "MAX: 27",
-    "loss": 1
-},{
-    "year": "2007",
-    "win": 26,
-    "loss": 1
-},{
-    "year": "29日",
-    "win": 24,
-    "loss": 3
-},{
-    "year": "2009",
-    "win": 26,
-    "loss": 2
-},{
-    "year": "2010",
-    "win": 20,
-    "loss": 3
-},{
-    "year": "2011",
-    "win": 20,
-    "loss": 4
-},{
-    "year": "29日",
-    "win": 19,
-    "loss": 3
-}];
 //台风数据点
 var path = [
     {"id":1,  "x":127.49357,  "y":34.883323, "radius":0},
@@ -169,6 +126,11 @@ require([
         map.on("load",function(){
             //增加船体图片
             getshipmessage();
+            //测试风杆数据的显示
+           var  pictureMarker = createPictureSymbol('/img/wind4.jpg', 0, 12, 30, 40);
+            var pt = new esri.geometry.Point(120,30,sr);
+            var graphic = new Graphic(pt, pictureMarker);
+            map.graphics.add(graphic);
             //调用画点划线的方法，台风路径展示
             //  addPath();
         });
@@ -465,7 +427,6 @@ require([
                 //将获取到的值显示在前端
             }*/
         }
-
         //图层清除
         function removedynamicLayer(op){
             if(flag===1||flag===2||flag===3||flag===4&&flag!=0){
@@ -526,6 +487,11 @@ require([
         };
         //海流数据弹窗展示
         function setflowObserver(evt){
+            //清空daytext
+            $(".day1").text("");
+            $(".day2").text("");
+            $(".day3").text("");
+            $(".day4").text("");
             if($("#windObserved").data("kendoWindow")){
                 $("#windObserved").data("kendoWindow").close();
             }
@@ -559,11 +525,11 @@ require([
                 type:"GET",
                 url:"/api/config/PostOFTCoordinates/"+marks[1]+"/"+marks[0],
                 success:function(data){
-                    console.log("hailiu data"+data[0].dates);
-                    $("#day1").text(data[0].dates);
-                    $("#day2").text(data[13].dates);
-                    $("#day3").text(data[26].dates);
-                    $("#day4").text(data[39].dates);
+                    console.log("hailiu data"+data[66].dates);
+                    $(".day1").text(data[0].dates);
+                    $(".day2").text(data[13].dates);
+                    $(".day3").text(data[39].dates);
+                    $(".day4").text(data[66].dates);
                 },
                 error:function(){
                     console.log("error")
@@ -638,6 +604,11 @@ require([
         }
         //能见度数据弹窗展示
         function  setWaveVisibility(evt){
+            //清空daytext
+            $(".day1").text("");
+            $(".day2").text("");
+            $(".day3").text("");
+            $(".day4").text("");
             //关闭其他窗体
             if($("#windObserved").data("kendoWindow")){
                 $("#windObserved").data("kendoWindow").close();
@@ -658,10 +629,99 @@ require([
                     title: "能见度预报展示"
                 });
             };
-            //获取船载观测数据
-            getObservedData(evt,0);
-            observed.data("kendoWindow").open();//打开window
+            //调用matchMark方法，获得匹配的mark(A-B)
+            var marks = matchLatAndLon(evt);
+            console.log("marks is ",marks);
+            //获取数据
+            getObData(evt,marks);
         };
+        function getObData(evt,marks){
+            //日期的获取
+            $.ajax({
+                type:"GET",
+                url:"/api/config/PostFishWindCoordinates/"+marks[1]+"/"+marks[0],
+                success:function(data){
+                    console.log("hailiu data"+data[0].dates);
+                    $(".day1").text(data[0].dates);
+                    $(".day2").text(data[4].dates);
+                    $(".day3").text(data[8].dates);
+                    $(".day4").text(data[12].dates);
+                    if(data[0].winddir!="NaN"){
+                        observed.data("kendoWindow").open();//打开window
+                    }else{
+                        alert("此点无相关数据！")
+                    }
+                },
+                error:function(){
+                    console.log("error")
+                }
+            });
+            //能见度
+            $("#chart4").kendoChart({
+                dataSource: {
+                    type: "json",
+                    transport: {
+                        read: "/api/config/PostFishWindCoordinates/"+marks[1]+"/"+marks[0]
+                    }
+                },
+                title:{
+                    text:"能见度数据展示 \n"+"("+evt.x.toFixed(2)+","+evt.y.toFixed(2)+")"
+                },
+                legend: {
+                    position: "bottom"
+                },
+                seriesDefaults: {
+                    type: "line"
+                },
+                series: [{
+                    field: "winddir",
+                    name: "能见度",
+                    markers: {
+                        size: 1,
+                        visual: function (e) {
+                            //判断是否为NaN
+                            var winddir=getWindDir(e.dataItem.winddir);
+                           if(winddir=="NaN"){
+                               var src = kendo.format("/img/zip.png", winddir);
+                               var image = new kendo.drawing.Image(src, e.rect);
+                               return image;
+                           }
+                        }
+                    },
+                    noteTextField: "extremum",
+                    notes: {
+                        label: {
+                            position: "outside"
+                        },
+                        position: "bottom"
+                    }
+                }],
+                valueAxis: {
+                    line: {
+                        visible: true
+                    }
+                },
+                categoryAxis: {
+                    field:"watertemp",
+                    majorGridLines: {
+                        visible: false
+                    },
+                    labels: {
+                        rotation: 0,
+                        step:2,
+                        format:"{0}/时"
+                    },
+                    crosshair: {
+                        visible: true
+                    }
+                },
+                tooltip: {
+                    visible: true,
+                    template: "#= series.name #: #= value #"
+                }
+            });
+
+        }
         //数据获取
         function getObservedData(evt,marks){
             //海面风
@@ -768,50 +828,6 @@ require([
                     visible: true,
                     shared: true,
                     format: "N0"
-                }
-            });
-            //能见度
-            $("#chart4").kendoChart({
-                dataSource: {
-                    data: grandSlam
-                },
-                title:{
-                    text:"能见度数据展示 \n"+"("+evt.x.toFixed(2)+","+evt.y.toFixed(2)+")"
-                },
-                legend: {
-                    position: "bottom"
-                },
-                seriesDefaults: {
-                    type: "line"
-                },
-                series: [{
-                    field: "win",
-                    name: "能见度最大值",
-                    noteTextField: "extremum",
-                    notes: {
-                        label: {
-                            position: "outside"
-                        },
-                        position: "bottom"
-                    }
-                },{
-                    field: "loss",
-                    name: "能见度平均值"
-                }],
-                valueAxis: {
-                    line: {
-                        visible: true
-                    }
-                },
-                categoryAxis: {
-                    field: "year",
-                    majorGridLines: {
-                        visible: false
-                    }
-                },
-                tooltip: {
-                    visible: true,
-                    template: "#= series.name #: #= value #"
                 }
             });
         }
@@ -941,8 +957,8 @@ require([
             for(var i =0;i< u.length;i++){
                 result=Math.sqrt(Math.pow(u[i],2)+Math.pow(v[i],2));
                 console.log("sqrt result is "+result);
-            }
 
+            }
         };
         //海面风数据加载
         $("#wind").click(function(){
