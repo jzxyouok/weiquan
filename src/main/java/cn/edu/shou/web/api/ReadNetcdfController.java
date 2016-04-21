@@ -30,6 +30,10 @@ public class ReadNetcdfController {
             ncfile = NetcdfFile.open(filename);
             String variable = "u10";
             String variable10 = "v10";
+            String lats ="lat";
+            String lons ="lon";
+            Variable varlat =ncfile.findVariable(lats);
+            Variable varlon =ncfile.findVariable(lons);
             Variable varu10 = ncfile.findVariable(variable);
             Variable varv10 = ncfile.findVariable(variable10);
 
@@ -44,19 +48,25 @@ public class ReadNetcdfController {
                 //第一个参数表示时间的范围，72表示要读取72个时刻的数据
                 //第二个表示经度的数据范围，1表示只读去一个点的数据
                 //第三个表示纬度的数据范围，1表示只读一个点的数据
-                int[] size = new int[]{48, 1, 1};//
+                int[] size = new int[]{144, 170, 116};//
                 Array data2D = varu10.read(origin, size);
                 //v10 read
                 System.out.println("data2d is"+data2D);
                 Array data3D = varv10.read(origin, size);
+                //经纬度的值
+                Array arrLat = varlat.read("0:170:5");
+                Array arrLon = varlon.read("0:116:5");
                 //开方
-                for(int i = 0;i<30;i++){
+                for(int i = 0;i<24;i++){
                     Map<String,String> map =new HashMap();
                     Double netcdfSqrt = Math.sqrt((Math.pow(data2D.getDouble(i), 2) + Math.pow(data3D.getDouble(i), 2)));
-                    System.out.println("netcdfsqrt"+netcdfSqrt);
-                    map.put("windSpeed", netcdfSqrt.toString());
-                    map.put("windDir", netcdfSqrt.toString());
-                    list.add(map);
+                    System.out.println("netcdf"+netcdfSqrt);
+                    if(netcdfSqrt>=7){
+                        System.out.println(i);
+                        map.put("windSpeed", String.valueOf(arrLat.getDouble(i)));
+                        map.put("windDir",String.valueOf(arrLon.getDouble(i)));
+                        list.add(map);
+                    }
                 }
             }
         }catch (Exception e){

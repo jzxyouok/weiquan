@@ -229,7 +229,6 @@ function initDataTreeView(listUrl){
           cha.className="map1";
           $("#mapDiv_zoom_slider").css("display","none");
           flag=true;
-
       }
   }
   //控制弹窗显示

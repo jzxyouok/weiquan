@@ -72,7 +72,7 @@ require([
         "esri/TimeExtent", "esri/dijit/TimeSlider",
         "dojo/_base/array","esri/geometry/geometryEngine", "esri/symbols/SimpleMarkerSymbol",
         "esri/symbols/SimpleFillSymbol","esri/tasks/query",
-        "dojo/dom-geometry","dojo/window","dojo/has",
+        "dojo/dom-geometry","dojo/window","dojo/has","esri/geometry/Polygon",
         "dojo/on",
         "dojo/dom",
         "dojo/domReady!"],
@@ -86,7 +86,7 @@ require([
              Circle,
              Graphic,Point,Popup,InfoTemplate,Draw,lang,Font,TextSymbol,GeometryService,DistanceParameters,
              TimeExtent, TimeSlider, arrayUtils,geometryEngine,SimpleMarkerSymbol,SimpleFillSymbol, Query,
-             domGeom,win,has,
+             domGeom,win,has,Polygon,
              on,dom
         ) {
         loading = dom.byId("loadingImg");
@@ -103,6 +103,8 @@ require([
         map.addLayer(clickLayer);
         pictureLayer = new GraphicsLayer({"id":"pictureLayer"});
         map.addLayer(pictureLayer,2);
+        var graLayer = new GraphicsLayer({"id":"graLayer"});
+        var pictureGraphic = new GraphicsLayer({"id":"pictureGraphic"});
         //气泡变量初始化
         var popup = map.infoWindow;
         popup.highlight = false;
@@ -113,29 +115,59 @@ require([
             new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
                 new Color([0,255,0, 0.3]), 10),
             new Color([0,255,0,1]));
+        var pSymbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_CIRCLE, 10,
+            new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
+                new Color([0,255,0, 0.3]), 10),
+            new Color([255,15,10,1]));
         var buffSymbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
             new SimpleLineSymbol(SimpleLineSymbol.STYLE_LONGDASHDOT,
-                new Color([0,0,0,1]), 3),
-            new Color([34,96,170,0.15]));
+                new Color([15,15,228,1]), 3),
+            new Color([255,15,15,0.6]));
         //航线变量定义
         var totalDistance = 0, inputPoints = [], legDistance = [], enableMeasureLength = false;
         //量算服务
         var geometryService = new GeometryService("http://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/Geometry/GeometryServer");
        //地图初始化执行的方法
-        var p = {};
+        var p = {};var longdistance;
         map.on("load",function(){
-            //增加船体图片
-            getshipmessage();
+            //显示24小时内所有风级大于7的点
+            addtoMap();
             //测试风杆数据的显示
-           var  pictureMarker = createPictureSymbol('/img/wind4.jpg', 0, 12, 30, 40);
+          /* var  pictureMarker = createPictureSymbol('/img/wind4.jpg', 0, 12, 30, 40);
             var pt = new esri.geometry.Point(120,30,sr);
             var graphic = new Graphic(pt, pictureMarker);
-            map.graphics.add(graphic);
+            map.graphics.add(graphic);*/
             //调用画点划线的方法，台风路径展示
-            //  addPath();
+           // addPath();
         });
+        function addtoMap(){
+            var url ="/api/config/PostCoordinates/0/0";
+            $.ajax({
+                type:"GET",
+                url:url,
+                success:function(data){
+                    console.log("data is get success",data);
+                    //添加所有点的数据
+                    addpointToMap(data);
+                },
+                error:function(data){
+                    console.log(data);
+                }
+            });
+        }
+        //点的添加
+        function addpointToMap(data){
+            console.log("addd");
+            for(var i =0;i<data.length;i++){
+                var ptv = new esri.geometry.Point(data[i].winddir,data[i].windspeed,sr);
+                var ptGraphic = new Graphic(ptv, pSymbol);
+                map.graphics.add(ptGraphic);
+            }
+            //增加船体图片这个data是全部的点
+            getshipmessage(data);
+        };
         //后台获取船的经纬度
-        function getshipmessage(){
+        function getshipmessage(distance){
             var url="/api/tbjhship/getAllMessages";
             $.ajax({
                 type:"GET",
@@ -143,24 +175,24 @@ require([
                 success:function(data){
                     console.log("data is get success",data);
                     //控制船的显示
-                    boatShowIndex(data);
+                    boatShowIndex(data,distance);
                 },
                 error:function(data){
                     console.log(data);
                 }
             });
         }
-        function boatShowIndex(data){
+        function boatShowIndex(data,distance){
             if(boatindex==0){
-                addGraphics(data,boatindex);
+                addGraphics(data,boatindex,distance);
             }else{
                 if(boatindex==3){
-                    addGraphics(data,3)
+
+                    addGraphics(data,3,distance)
                 }
                 if(boatindex==2){
-                    addGraphics(data,2);
+                    addGraphics(data,2,distance);
                 }
-
             }
         }
         //船的类型数据
@@ -205,7 +237,6 @@ require([
                 if (nodes[i].checked) {
                     checkedNodes.push(nodes[i].id);
                 }
-
                 if (nodes[i].hasChildren) {
                     checkedNodeIds(nodes[i].children.view(), checkedNodes);
                 }
@@ -222,11 +253,12 @@ require([
                 console.log(message[0])
                 if(message[0]==1){
                     boatindex=3;
-                    getshipmessage();
+                    addtoMap();
                 }else if(message[0]==2||message[0]==3||message[0]==4){
                     map.graphics.clear();
                     boatindex=2;
-                    getshipmessage();
+                  // getshipmessage();
+                    addtoMap();
                 }
             } else {
                 map.graphics.clear();
@@ -234,52 +266,64 @@ require([
             console.log("message"+message);
         }
         //增加船体图片的方法
-        function addGraphics(evt,i){
-
+        function addGraphics(evt,i,distance){
+            graLayer.clear();
+            pictureGraphic.clear();
             var lat = evt[i].lat;
             var lon = evt[i].lon;
             p = new esri.geometry.Point(lon,lat,sr);
+            console.log("船体的点",p);
+            //添加一个半径当前点
+            var areas = 190;
+            console.log("areas"+areas);
+            // 圆,半径为areas
 
+            var buffer = geometryEngine.geodesicBuffer(p,areas , "miles");
+            var bufferGraphic = new Graphic(buffer, buffSymbol);
+            graLayer.add(bufferGraphic);
+            map.addLayer(graLayer);
+            //船体
             var  symMarker = createPictureSymbol('/img/boat1.png', 0, 12, 30, 40);
-            var pictureGraphic = new Graphic(p, symMarker, null);
-            map.graphics.add(pictureGraphic);
-            popwindow();
-            function popwindow(){
-                //气泡
-                map.infoWindow.resize(250,200);
-                map.infoWindow.setTitle("海监船航行预警预报");
-                map.infoWindow.setContent(
-                        "坐标点 : " +lat.toFixed(2) + ", " + lon.toFixed(2) +
-                        "<br>"+"航速: 20km/h<br>航向: 东南<br>大风预警：距离3级大风还有100海里，预计当前船速3分钟内到达风圈<br>" +
-                        "大浪预警：距离3级大浪还有200海里，预警当前航速5分钟到达浪圈<br>" +
-                        "台风预警：距离台风风眼还有400海里"
-                );
-                map.infoWindow.show(p,map.getInfoWindowAnchor(p));
+            var picture = new Graphic(p, symMarker, null)
+            pictureGraphic.add(picture);
+            map.addLayer(pictureGraphic);
+            for(var j =0;j<distance.length;j++){
+                var x0=lat-distance[j].winddir;
+                var y0=lon-distance[j].windspeed;
+                longdistance = Math.sqrt(Math.pow(x0,2)+Math.pow(y0,2));
+                console.log("Math.abs(longdistance)"+Math.abs(longdistance));
+                if(Math.abs(longdistance)<=areas&&i!=0){
+                    popwindow(p);
+                }
             }
-
             //注册点击的graphics事件
-            dojo.connect(map.graphics, "onClick", function(){
-                //添加一个半径当前点
-                var buffer = geometryEngine.geodesicBuffer(p, 10, "miles");
-                var bufferGraphic = new Graphic(buffer, buffSymbol);
-                map.graphics.add(bufferGraphic);
+            dojo.connect(pictureGraphic, "onClick", function(){
                 //显示船载观测数据窗体
                 setShipObserve(true);
-                $("#dataType").css("display","block");
-                $("#shipobserve").css("display","block");
                 //船的数据类型
                 setboatTypeObserve(true);
-
             });
             //鼠标经过船体事件
-            dojo.connect(map.graphics,"onMouseOver",function(){
+            dojo.connect(pictureGraphic,"onMouseOver",function(){
                  map.infoWindow.setTitle("船的位置及编号:");
                  map.infoWindow.setContent("位置坐标："+ p.x+ p.y+"<br>"+
                      "船的编号"+evt[i].shipid);
-
                 map.infoWindow.show(p,map.getInfoWindowAnchor(p));
              });
         };
+
+        function popwindow(p){
+            //气泡
+            map.infoWindow.resize(250,200);
+            map.infoWindow.setTitle("海监船航行预警预报");
+            map.infoWindow.setContent(
+                    "坐标点 : " + p.x.toFixed(2) + ", " + p.y.toFixed(2) +
+                    "<br>"+"航速: 20km/h<br>航向: 东南<br>大风预警：距离3级大风还有100海里，预计当前船速3分钟内到达风圈<br>" +
+                    "大浪预警：距离7级大浪还有"+Math.abs(longdistance).toFixed(4)+"海里，预警当前航速"+(Math.abs(longdistance)/20).toFixed(2)+"时到达浪圈<br>" +
+                    "台风预警：距离台风风眼还有400海里"
+            );
+            map.infoWindow.show(p,map.getInfoWindowAnchor(p));
+        }
         //pictureSymbol的创建方法
         function createPictureSymbol(url, xOffset, yOffset, xWidth, yHeight) {
             return new PictureMarkerSymbol(
@@ -310,7 +354,6 @@ require([
             //添加一个graphic在当前点的位置上
             var ptGraphic = new Graphic(point, pointSymbol);
             map.graphics.add(ptGraphic);
-
             for(var i in extents){
                 if(i == (flag-1) && flag==extents[i].flag){
                     //判断当前点是否是陆地
@@ -330,12 +373,12 @@ require([
                     }else{
                         //如果是陆地的话，气泡显示经纬度
                         console.log("point"+point.x+point.y);
-                            var latitude = point.x;
-                            var longitude = point.y;
-                            var infotemplate = new InfoTemplate("该点坐标信息","lat/lon : " +latitude.toFixed(2) + ", " + longitude.toFixed(2));
-                            var pictureSymbol =   new PictureMarkerSymbol('/img/typhoon.jpg', 30, 30);
-                            var pictureGraphic = new Graphic(point, pictureSymbol, null,infotemplate);
-                        //  map.graphics.add(pictureGraphic);
+                        map.infoWindow.resize(100,100);
+                        map.infoWindow.setTitle("该点信息");
+                        map.infoWindow.setContent(
+                                "坐标点 : " +point.x.toFixed(2) + ", " + point.y.toFixed(2)
+                        );
+                        map.infoWindow.show(point,map.getInfoWindowAnchor(point));
                     }
                 }
             }
@@ -957,7 +1000,6 @@ require([
             for(var i =0;i< u.length;i++){
                 result=Math.sqrt(Math.pow(u[i],2)+Math.pow(v[i],2));
                 console.log("sqrt result is "+result);
-
             }
         };
         //海面风数据加载
@@ -1244,7 +1286,7 @@ function addPath(){
             //clickLayer.add(gCircleEnd);
             //map.centerAndZoom(ptStart);
             pictureLayer.clear();
-            pictureLayer.add(graphic);
+           pictureLayer.add(graphic);
             pictureLayer.add(gCircleStart);
             clickLayer.add(gPtEnd);
         }
