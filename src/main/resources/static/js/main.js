@@ -266,7 +266,7 @@ require([
             console.log("message"+message);
         }
         //增加船体图片的方法
-        function addGraphics(evt,i,distance){
+        function addGraphics(evt,i){
             graLayer.clear();
             pictureGraphic.clear();
             var lat = evt[i].lat;
@@ -277,7 +277,6 @@ require([
             var areas = 190;
             console.log("areas"+areas);
             // 圆,半径为areas
-
             var buffer = geometryEngine.geodesicBuffer(p,areas , "miles");
             var bufferGraphic = new Graphic(buffer, buffSymbol);
             graLayer.add(bufferGraphic);
@@ -304,12 +303,16 @@ require([
                 setboatTypeObserve(true);
             });
             //鼠标经过船体事件
-            dojo.connect(pictureGraphic,"onMouseOver",function(){
+            dojo.connect(pictureGraphic,"onMouseMove",function(){
                  map.infoWindow.setTitle("船的位置及编号:");
                  map.infoWindow.setContent("位置坐标："+ p.x+ p.y+"<br>"+
                      "船的编号"+evt[i].shipid);
                 map.infoWindow.show(p,map.getInfoWindowAnchor(p));
+                map.setCursor("pointer");
              });
+            dojo.connect(pictureGraphic,"onMouseOut",function(){
+                map.setCursor("default");
+            });
         };
 
         function popwindow(p){
@@ -373,10 +376,10 @@ require([
                     }else{
                         //如果是陆地的话，气泡显示经纬度
                         console.log("point"+point.x+point.y);
-                        map.infoWindow.resize(100,100);
+                        map.infoWindow.resize(200,50);
                         map.infoWindow.setTitle("该点信息");
                         map.infoWindow.setContent(
-                                "坐标点 : " +point.x.toFixed(2) + ", " + point.y.toFixed(2)
+                                "经纬度: " +point.x.toFixed(2) + ", " + point.y.toFixed(2)
                         );
                         map.infoWindow.show(point,map.getInfoWindowAnchor(point));
                     }
