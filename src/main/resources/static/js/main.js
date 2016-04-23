@@ -266,7 +266,7 @@ require([
             console.log("message"+message);
         }
         //增加船体图片的方法
-        function addGraphics(evt,i){
+        function addGraphics(evt,i,distance){
             graLayer.clear();
             pictureGraphic.clear();
             var lat = evt[i].lat;
@@ -290,7 +290,6 @@ require([
                 var x0=lat-distance[j].winddir;
                 var y0=lon-distance[j].windspeed;
                 longdistance = Math.sqrt(Math.pow(x0,2)+Math.pow(y0,2));
-                console.log("Math.abs(longdistance)"+Math.abs(longdistance));
                 if(Math.abs(longdistance)<=areas&&i!=0){
                     popwindow(p);
                 }
@@ -304,7 +303,7 @@ require([
             });
             //鼠标经过船体事件
             dojo.connect(pictureGraphic,"onMouseMove",function(){
-                 map.infoWindow.setTitle("船的位置及编号:");
+                 map.infoWindow.setTitle("船的位置及编号");
                  map.infoWindow.setContent("位置坐标："+ p.x+ p.y+"<br>"+
                      "船的编号"+evt[i].shipid);
                 map.infoWindow.show(p,map.getInfoWindowAnchor(p));

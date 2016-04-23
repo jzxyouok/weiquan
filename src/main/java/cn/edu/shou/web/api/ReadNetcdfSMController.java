@@ -1,7 +1,10 @@
 package cn.edu.shou.web.api;
+
 import cn.edu.shou.domain.tbjhshipdata;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 import ucar.ma2.Array;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
@@ -13,19 +16,17 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by Administrator on 2016/4/2.
+ * Created by Administrator on 2016/4/23.
  */
 @RestController
 @RequestMapping(value = "/api/config")
-public class ReadNetcdfController {
+public class ReadNetcdfSMController {
     NetcdfFile ncfile = null;
-    String filename = "D:\\jidi\\Wind_wq_sugon_wrf_2015121620.nc";
+    String filename = "D:\\jidi\\SM_20160420_05h48m.nc";
     //获取u v 数据值
     // lat 纬度 lon 经度
-    @RequestMapping(value = "/getSqrt", method =RequestMethod.GET)
     public List<Map<String, String>> getNetCdfPredictData(int lat,int lon) throws Exception{
         List<Map<String,String>> list = new ArrayList<Map<String,String>>();
-
         try{
             ncfile = NetcdfFile.open(filename);
             String variable = "u10";
