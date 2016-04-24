@@ -48,15 +48,29 @@ public class ReadNetcdfSMController {
                 //第一个参数表示时间的范围，72表示要读取72个时刻的数据
                 //第二个表示经度的数据范围，1表示只读去一个点的数据
                 //第三个表示纬度的数据范围，1表示只读一个点的数据
-                int[] size = new int[]{144, 170, 116};//
+                int[] size = new int[] {160,160};//
                 Array data2D = varu10.read(origin, size);
                 //v10 read
                 System.out.println("data2d is"+data2D);
                 Array data3D = varv10.read(origin, size);
-                //经纬度的值
+            /*    //经纬度的值
                 Array arrLat = varlat.read("0:170:5");
-                Array arrLon = varlon.read("0:116:5");
-
+                Array arrLon = varlon.read("0:116:5");*/
+                Double a [][] = new Double[160][160];
+                int count=0;
+                for(int i=0;i<160;i++){
+                    for(int j=0;j<160;j++){
+                        a[i][j]=data2D.getDouble(count);
+                        count++;
+                        System.out.println("count is "+count);
+                    }
+                }
+                for(int i=0;i<a.length;i++){
+                    for(int j=0;j<a[i].length;j++){
+                        System.out.print(a[i][j]);
+                    }
+                    System.out.println();
+                }
 
                 //开方
                /* for(int i = 0;i<24;i++){
