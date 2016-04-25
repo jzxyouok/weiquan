@@ -7,7 +7,6 @@ $(document).ready(function(){
         /*下拉框出现*/
         var Obj = $(this).attr('id');
         num = Obj.substring(3, Obj.length);
-        console.log(num)
         $('#box-'+num).slideDown(300);
     },function(){
         /*图标向下旋转*/

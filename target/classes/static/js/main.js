@@ -128,8 +128,58 @@ require([
         //量算服务
         var geometryService = new GeometryService("http://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/Geometry/GeometryServer");
        //地图初始化执行的方法
-        var p = {};var longdistance;
+        var p = {};var longdistance,scale,zoomend;
+        map.on("zoom-end",zoomsclae)
+        function zoomsclae(){
+            scale=0;
+            console.log("map.getZoomScale() end\n"+map.getScale());
+            zoomend= map.getScale();
+            if(zoomend<=2500){19349707
+                scale=0;
+            }
+            if(zoomend>2500&&zoomend<=5000){
+                scale=1;
+            }
+            if(zoomend>5000&&zoomend<=10000){
+                scale=2;
+            }
+            if(zoomend>1000&&zoomend<=25000){
+                scale=3;
+            }
+            if(zoomend>25000&&zoomend<=50000){
+                scale=4;
+            }
+            if(zoomend>5000&&zoomend<=10000){
+                scale=5;
+            }
+            if(zoomend>10000&&zoomend<=250000){
+                scale=6;
+            }
+            if(zoomend>250000&&zoomend<=500000){
+                scale=7;
+            }
+            if(zoomend>500000&&zoomend<=1000000){
+                scale=8;
+            }
+            if(zoomend>1000000&&zoomend<=2500000){
+                scale=9;
+            }
+            if(zoomend>2500000&&zoomend<=5000000){
+                scale=10;
+            }
+            if(zoomend>5000000&&zoomend<=10000000){
+                scale=11;
+            }
+            if(zoomend>1000000&&zoomend<=50000000){
+                scale=12;
+            }
+            if(zoomend>50000000){
+                scale=13;
+            }
+            console.log("scale is\n "+scale)
+        };
         map.on("load",function(){
+           // zoomstart=map.getScale();
             //显示24小时内所有风级大于7的点
             addtoMap();
             //测试风杆数据的显示
@@ -139,6 +189,7 @@ require([
             map.graphics.add(graphic);*/
             //调用画点划线的方法，台风路径展示
            // addPath();
+
         });
         function addtoMap(){
             var url ="/api/config/PostCoordinates/0/0";
@@ -985,25 +1036,29 @@ require([
         $("#stalite").click(function(){
             $.ajax({
                 type:"GET",
-                url:"/js/data/LatAndLon.json",
-                async:false,
+                url:"/api/config/PostSMCoordinates/"+scale,
                 success:function(data){
-                  var obj = new Function("return" + data)();
-                   console.log(obj.u);
-                   getUVsqrt(obj.u,obj.v);
-                },
-                error:function(data){
                     console.log(data);
+                    addPicture(data);
+                },
+                error:function(){
+                    console.log("error");
                 }
-            });
+            })
         });
-        function getUVsqrt(u,v){
-            var result;
-            for(var i =0;i< u.length;i++){
-                result=Math.sqrt(Math.pow(u[i],2)+Math.pow(v[i],2));
-                console.log("sqrt result is "+result);
-            }
-        };
+       function addPicture(data){
+           for(var i =0;i<data.length;i++){
+               var pt = new esri.geometry.Point(data[i].winddir,data[i].watertemp,sr);
+               if(data[i].windspeed>2&&data[i].windspeed<=4){
+                   var  pictureMarker = createPictureSymbol('/img/north4.png', 0, 12, 30, 40);
+               }
+               if(data[i].windspeed>4&&data[i].windspeed<=6){
+                   var  pictureMarker = createPictureSymbol('/img/west5.png', 0, 12, 30, 40);
+               }
+               var graphic = new Graphic(pt, pictureMarker);
+               map.graphics.add(graphic);
+           }
+       }
         //海面风数据加载
         $("#wind").click(function(){
             console.log("oplayer is"+opLayer);
