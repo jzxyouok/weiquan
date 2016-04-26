@@ -24,4 +24,5 @@ public class TbjhshipApiController {
         List<tbjhship> tbjhShips =shipRepository.getAllMessages();
         return tbjhShips;
     }
+
 }

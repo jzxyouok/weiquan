@@ -122,19 +122,21 @@ require([
         var buffSymbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
             new SimpleLineSymbol(SimpleLineSymbol.STYLE_LONGDASHDOT,
                 new Color([15,15,228,1]), 3),
-            new Color([255,15,15,0.6]));
+            new Color([0,229,238,0.6]));
         //航线变量定义
         var totalDistance = 0, inputPoints = [], legDistance = [], enableMeasureLength = false;
         //量算服务
         var geometryService = new GeometryService("http://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/Geometry/GeometryServer");
        //地图初始化执行的方法
-        var p = {};var longdistance,scale,zoomend;
+        var p = {};
+        var longdistance,scale,zoomend;
+        var shipspeed,shipdir,areas;
         map.on("zoom-end",zoomsclae)
         function zoomsclae(){
             scale=0;
             console.log("map.getZoomScale() end\n"+map.getScale());
             zoomend= map.getScale();
-            if(zoomend<=2500){19349707
+            if(zoomend<=2500){
                 scale=0;
             }
             if(zoomend>2500&&zoomend<=5000){
@@ -209,7 +211,7 @@ require([
         //点的添加
         function addpointToMap(data){
             console.log("addd");
-            for(var i =0;i<data.length;i++){
+            for(var i =3;i<data.length;i=i+3){
                 var ptv = new esri.geometry.Point(data[i].winddir,data[i].windspeed,sr);
                 var ptGraphic = new Graphic(ptv, pSymbol);
                 map.graphics.add(ptGraphic);
@@ -238,7 +240,6 @@ require([
                 addGraphics(data,boatindex,distance);
             }else{
                 if(boatindex==3){
-
                     addGraphics(data,3,distance)
                 }
                 if(boatindex==2){
@@ -322,10 +323,12 @@ require([
             pictureGraphic.clear();
             var lat = evt[i].lat;
             var lon = evt[i].lon;
+             shipspeed=evt[i].shipspeed;
+             shipdir=evt[i].shipdir;
             p = new esri.geometry.Point(lon,lat,sr);
             console.log("船体的点",p);
             //添加一个半径当前点
-            var areas = 190;
+            areas = shipspeed*24;
             console.log("areas"+areas);
             // 圆,半径为areas
             var buffer = geometryEngine.geodesicBuffer(p,areas , "miles");
@@ -333,15 +336,18 @@ require([
             graLayer.add(bufferGraphic);
             map.addLayer(graLayer);
             //船体
-            var  symMarker = createPictureSymbol('/img/boat1.png', 0, 12, 30, 40);
+            var  symMarker = createPictureSymbol('/img/boat1.png', 0, 12, 30, 45);
             var picture = new Graphic(p, symMarker, null)
             pictureGraphic.add(picture);
             map.addLayer(pictureGraphic);
             for(var j =0;j<distance.length;j++){
-                var x0=lat-distance[j].winddir;
-                var y0=lon-distance[j].windspeed;
+                var x0=Math.abs(lat)-Math.abs(distance[j].winddir);
+                var y0=Math.abs(lon)-Math.abs(distance[j].windspeed);
                 longdistance = Math.sqrt(Math.pow(x0,2)+Math.pow(y0,2));
-                if(Math.abs(longdistance)<=areas&&i!=0){
+                console.log("longdistance"+longdistance.toFixed(0));
+                if(longdistance.toFixed(0)<=areas &&i!=2){
+                    popWarwindow(p);
+                }else{
                     popwindow(p);
                 }
             }
@@ -354,9 +360,10 @@ require([
             });
             //鼠标经过船体事件
             dojo.connect(pictureGraphic,"onMouseMove",function(){
+                $(".titlePane").css("background-color","#1E90FF!important");
                  map.infoWindow.setTitle("船的位置及编号");
-                 map.infoWindow.setContent("位置坐标："+ p.x+ p.y+"<br>"+
-                     "船的编号"+evt[i].shipid);
+                 map.infoWindow.setContent("位置坐标："+ p.x+","+ p.y+"<br>"+
+                     "船的编号"+evt[i].shipid+", "+"预警半径："+areas);
                 map.infoWindow.show(p,map.getInfoWindowAnchor(p));
                 map.setCursor("pointer");
              });
@@ -365,15 +372,30 @@ require([
             });
         };
 
-        function popwindow(p){
+        function popWarwindow(p){
             //气泡
+            $(".titlePane").css("background-color","#AF2811!important");
             map.infoWindow.resize(250,200);
             map.infoWindow.setTitle("海监船航行预警预报");
             map.infoWindow.setContent(
                     "坐标点 : " + p.x.toFixed(2) + ", " + p.y.toFixed(2) +
-                    "<br>"+"航速: 20km/h<br>航向: 东南<br>大风预警：距离3级大风还有100海里，预计当前船速3分钟内到达风圈<br>" +
+                    "<br>"+"航速:"+shipspeed+"km/h"+"<br>航向: "+shipdir+"<br>" +
+                        "大风预警：距离3级大风还有100海里，预计当前船速3分钟内到达风圈<br>" +
                     "大浪预警：距离7级大浪还有"+Math.abs(longdistance).toFixed(4)+"海里，预警当前航速"+(Math.abs(longdistance)/20).toFixed(2)+"时到达浪圈<br>" +
-                    "台风预警：距离台风风眼还有400海里"
+                    "当前航速下的预警半径："+areas
+            );
+            map.infoWindow.show(p,map.getInfoWindowAnchor(p));
+        }
+        function popwindow(p){
+            //气泡
+            $(".titlePane").css("background-color","#1E90FF!important");
+            map.infoWindow.resize(250,200);
+            map.infoWindow.setTitle("海监船航行预警预报");
+            map.infoWindow.setContent(
+                    "坐标点 : " + p.x.toFixed(2) + ", " + p.y.toFixed(2) +
+                    "<br>"+"航速: "+shipspeed+"km/h"+"<br>航向:"+shipdir+"<br>" +
+                    "大风大浪预警：当前无预警信息，未达风圈预警值，预警当前航速20km<br>" +
+                    "当前航速下的预警半径："+areas
             );
             map.infoWindow.show(p,map.getInfoWindowAnchor(p));
         }
@@ -1050,10 +1072,10 @@ require([
            for(var i =0;i<data.length;i++){
                var pt = new esri.geometry.Point(data[i].winddir,data[i].watertemp,sr);
                if(data[i].windspeed>2&&data[i].windspeed<=4){
-                   var  pictureMarker = createPictureSymbol('/img/north4.png', 0, 12, 30, 40);
+                   var  pictureMarker = createPictureSymbol('/img/north4.png', 0, 5, 5, 10);
                }
                if(data[i].windspeed>4&&data[i].windspeed<=6){
-                   var  pictureMarker = createPictureSymbol('/img/west5.png', 0, 12, 30, 40);
+                   var  pictureMarker = createPictureSymbol('/img/north4.png', 0, 5, 5, 10);
                }
                var graphic = new Graphic(pt, pictureMarker);
                map.graphics.add(graphic);

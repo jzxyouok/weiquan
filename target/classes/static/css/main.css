@@ -42,9 +42,7 @@
 a.k-link.k-nav-today{
     display: none !important;
 }
-.titlePane{
-    background-color: #AF2811!important;
-}
+
 #timeInfo{
     border-radius: 4px;
     border: solid 2px #082DE4;

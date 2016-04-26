@@ -19,7 +19,6 @@ public class UserApiController {
     //通过用户名获取用户信息
     @RequestMapping(value="/getUserByUserName", method= RequestMethod.GET)
     public User getuserbyusername(String userName){
-
         return usDAO.findByUserName(userName);
     }
     //通过用户Id获取用户信息

@@ -15,5 +15,4 @@ public interface tbjhShipRepository extends PagingAndSortingRepository<tbjhship,
 
     @Query(value = "select ship from tbjhship ship")
     public List<tbjhship> getAllMessages();
-
 }

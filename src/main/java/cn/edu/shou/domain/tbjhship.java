@@ -7,6 +7,7 @@ import lombok.Setter;
 import org.joda.time.DateTime;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
 
 /**
@@ -27,6 +28,24 @@ public class tbjhship {
     private float lat;//纬度
     @Setter @Getter
     private float lon;//经度
+    @Setter @Getter @Column(nullable = true)
+    private  float shipdir;//航向
+    @Setter @Getter @Column(nullable = true)
+    private  float shipspeed;//航速
+
+    public float getShipspeed() {
+        return shipspeed;
+    }
+    public void setShipspeed(float shipspeed) {
+        this.shipspeed = shipspeed;
+    }
+    public float getShipdir() {
+        return shipdir;
+    }
+
+    public void setShipdir(float shipdir) {
+        this.shipdir = shipdir;
+    }
 
     public int getId() {
         return id;
