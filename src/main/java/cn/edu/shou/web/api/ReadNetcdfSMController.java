@@ -49,12 +49,12 @@ public class ReadNetcdfSMController {
                 //经纬度数据
                 List latrang = new ArrayList();
                 latrang.add(new Range(0,160));
-                Array lattigude = varlat.read(latrang);
+                Array lattigude = varlat.read(latrang).reduce();
                 List lonrang = new ArrayList();
                 lonrang.add(new Range(0,160));
-                Array longtigude = varlon.read(lonrang);
+                Array longtigude = varlon.read(lonrang).reduce();
                 //开方
-               /* switch (zoom){
+                switch (zoom){
                     case 0:count=1;break;
                     case 1:count=5;break;
                     case 2:count=10;break;
@@ -70,19 +70,19 @@ public class ReadNetcdfSMController {
                     case 12:count=3300;break;
                     case 13:count=4000;break;
                     default:count=1;break;
-                }*/
+                }
                       for(int j=0;j<10;j++){
-                            Map<String,String>map = new HashMap<String, String>();
+                          Map<String,String>map = new HashMap<String, String>();
                             if(Double.isNaN(data2D.getDouble(counts))!=true&&Double.isNaN(data3D.getDouble(counts))!=true){
                                 Double netcdfSqrt = Math.sqrt((Math.pow(data2D.getDouble(counts), 2) + Math.pow(data3D.getDouble(counts), 2)));
                                 map.put("windSpeed",String.valueOf(netcdfSqrt));
                                 //  map.put("u_10m",String.valueOf(data2D.getDouble(counts)));
                                 //   map.put("v_10m",String.valueOf(data3D.getDouble(counts)));
                             }
-                            map.put("lattigude",String.valueOf(lattigude.getDouble(counts)));
-                            map.put("longtigude",String.valueOf(longtigude.getDouble(counts)));
-                            list.add(map);
-                            counts+=1;
+                          map.put("lattigude",String.valueOf(lattigude.getDouble(counts)));
+                          map.put("longtigude",String.valueOf(longtigude.getDouble(counts)));
+                          list.add(map);
+                          counts+=1;
                         }
                     }
         }catch (Exception e){

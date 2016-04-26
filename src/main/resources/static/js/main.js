@@ -388,7 +388,7 @@ require([
         }
         function popwindow(p){
             //气泡
-            $(".titlePane").css("background-color","#1E90FF!important");
+            $(".titlePane").css("background-color","#00FF00!important");
             map.infoWindow.resize(250,200);
             map.infoWindow.setTitle("海监船航行预警预报");
             map.infoWindow.setContent(
