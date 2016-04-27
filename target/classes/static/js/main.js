@@ -52,7 +52,7 @@ var extents=[{"flag":1,
     ];
 var  clickLayer,sr,pictureLayer;
 var map,opLayer=null,loading,query,showLoad,open,boatindex=0;
-var index = 0,t= 0,flag=0;
+var index = 0,t= 0,flag= 0,R=6371.004;
 require([
         "esri/map",
         "esri/layers/ArcGISDynamicMapServiceLayer",
@@ -321,17 +321,18 @@ require([
         function addGraphics(evt,i,distance){
             graLayer.clear();
             pictureGraphic.clear();
+            //东海区域的计算公式 东晋取正值，北纬取90-维度
             var lat = evt[i].lat;
             var lon = evt[i].lon;
-             shipspeed=evt[i].shipspeed;
-             shipdir=evt[i].shipdir;
+            shipspeed=evt[i].shipspeed;
+            shipdir=evt[i].shipdir;
             p = new esri.geometry.Point(lon,lat,sr);
             console.log("船体的点",p);
             //添加一个半径当前点
             areas = shipspeed*24;
             console.log("areas"+areas);
             // 圆,半径为areas
-            var buffer = geometryEngine.geodesicBuffer(p,areas , "miles");
+            var buffer = geometryEngine.geodesicBuffer(p,areas , "kilometers");
             var bufferGraphic = new Graphic(buffer, buffSymbol);
             graLayer.add(bufferGraphic);
             map.addLayer(graLayer);
@@ -341,11 +342,16 @@ require([
             pictureGraphic.add(picture);
             map.addLayer(pictureGraphic);
             for(var j =0;j<distance.length;j++){
-                var x0=Math.abs(lat)-Math.abs(distance[j].winddir);
-                var y0=Math.abs(lon)-Math.abs(distance[j].windspeed);
-                longdistance = Math.sqrt(Math.pow(x0,2)+Math.pow(y0,2));
-                console.log("longdistance"+longdistance.toFixed(0));
-                if(longdistance.toFixed(0)<=areas &&i!=2){
+                var x0=(90-lat)-(90-distance[j].winddir);
+                var y0=lon-distance[j].windspeed;
+                //C = sin(MLatA)*sin(MLatB)*cos(MLonA-MLonB) + cos(MLatA)*cos(MLatB)
+                //C = sin(LatA)*sin(LatB) + cos(LatA)*cos(LatB)*cos(MLonA-MLonB)
+                // Distance = R*Arccos(C)*Pi/180
+               // var C = Math.sin((90-lat))*Math.sin(lon)*Math.cos(y0) + Math.cos(lat)*Math.cos((90-distance[j].winddir));
+                var C = Math.sin(lat)*Math.sin(distance[j].winddir)+Math.cos(lat)*Math.cos(distance[j].winddir)*Math.cos(lon-distance[j].windspeed);
+                longdistance = R*Math.acos(C)*Math.PI*1.5/180;
+                console.log("longdistance"+longdistance);
+                if(longdistance.toFixed(0)<=areas){
                     popWarwindow(p);
                 }else{
                     popwindow(p);

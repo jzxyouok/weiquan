@@ -71,7 +71,7 @@ public class ReadNetcdfSMController {
                     case 13:count=4000;break;
                     default:count=1;break;
                 }
-                      for(int j=0;j<10;j++){
+                      for(int j=0;j<20;j++){
                           Map<String,String>map = new HashMap<String, String>();
                             if(Double.isNaN(data2D.getDouble(counts))!=true&&Double.isNaN(data3D.getDouble(counts))!=true){
                                 Double netcdfSqrt = Math.sqrt((Math.pow(data2D.getDouble(counts), 2) + Math.pow(data3D.getDouble(counts), 2)));
