@@ -43,32 +43,38 @@ public class ReadNetcdfController {
                 //第二个参数为经度的数据编号，表示从哪个经度数据开始
                 //第三个参数为维度的数据编号，表示从哪个维度数据开始
                 int[] origin = new int[]{0, 0, 0};//位置
-                origin[1]=lat;
-                origin[2]=lon;
+                //origin[1]=lat;
+                //origin[2]=lon;
                 //第一个参数表示时间的范围，72表示要读取72个时刻的数据
                 //第二个表示经度的数据范围，1表示只读去一个点的数据
                 //第三个表示纬度的数据范围，1表示只读一个点的数据
-                int[] size = new int[]{144, 170, 116};//
+
+                int[] size = new int[]{lat, 170, 116};//
                 Array data2D = varu10.read(origin, size);
                 //v10 read
-                System.out.println("data2d is"+data2D);
                 Array data3D = varv10.read(origin, size);
                 //经纬度的值
-                Array arrLat = varlat.read("0:170:5");
-                Array arrLon = varlon.read("0:116:5");
+                Array arrLat = varlat.read("0:170:1");
+                Array arrLon = varlon.read("0:116:1");
                 //开方
-                for(int i = 0;i<24;i++){
-                    Map<String,String> map =new HashMap();
-                    Double netcdfSqrt = Math.sqrt((Math.pow(data2D.getDouble(i), 2) + Math.pow(data3D.getDouble(i), 2)));
-                    System.out.println("netcdf"+netcdfSqrt);
-                    if(netcdfSqrt>=13.9&&netcdfSqrt<=17.1){
-                        System.out.println(i);
-                        map.put("windSpeed", String.valueOf(arrLat.getDouble(i)));
-                        map.put("windDir",String.valueOf(arrLon.getDouble(i)));
-                        list.add(map);
-                    }
+                    for(int i = 0;i<170;i++){
+                        for(int j=0;j<116;j++){
+                            Map<String,String> map =new HashMap();
+                            Double netcdfSqrt = Math.sqrt((Math.pow(data2D.getDouble(i+lat*170), 2) + Math.pow(data3D.getDouble(j+lat*116), 2)));
+                            if(netcdfSqrt>13.7&&arrLat.getDouble(i)>25&&arrLat.getDouble(i)<33&&arrLon.getDouble(j)>120&&arrLon.getDouble(j)<131){
+                                map.put("windSpeed", String.valueOf(arrLat.getDouble(i)));
+                                map.put("windDir",String.valueOf(arrLon.getDouble(j)));
+                                list.add(map);
+                            }
+                        }
                 }
-            }
+               /* for(int j:a){
+                    Map<String,String> map =new HashMap();
+                    map.put("windSpeed", String.valueOf(arrLat.getDouble(j)));
+                    map.put("windDir",String.valueOf(arrLon.getDouble(j)));
+                    list.add(map);
+                }*/
+                }
         }catch (Exception e){
             e.printStackTrace();
         }finally {
@@ -89,7 +95,7 @@ public class ReadNetcdfController {
             Map<String,Integer> map=getLatAndLonIndex(lat,lon);
             //return list
             list1 =  getNetCdfPredictData(map.get("latindex"),map.get("lonindex"));
-            System.out.println("list1 is"+list1);
+            System.out.println("list1 is"+list1.size());
         }catch (Exception e){
             e.printStackTrace();
         }

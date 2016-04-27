@@ -183,7 +183,7 @@ require([
         map.on("load",function(){
            // zoomstart=map.getScale();
             //显示24小时内所有风级大于7的点
-            addtoMap();
+                addtoMap(142);
             //测试风杆数据的显示
           /* var  pictureMarker = createPictureSymbol('/img/wind4.jpg', 0, 12, 30, 40);
             var pt = new esri.geometry.Point(120,30,sr);
@@ -193,8 +193,8 @@ require([
            // addPath();
 
         });
-        function addtoMap(){
-            var url ="/api/config/PostCoordinates/0/0";
+        function addtoMap(times){
+            var url ="/api/config/PostCoordinates/"+times+"/0";
             $.ajax({
                 type:"GET",
                 url:url,
@@ -211,8 +211,9 @@ require([
         //点的添加
         function addpointToMap(data){
             console.log("addd");
-            for(var i =3;i<data.length;i=i+3){
+            for(var i =0;i<data.length;i++){
                 var ptv = new esri.geometry.Point(data[i].winddir,data[i].windspeed,sr);
+                console.log("点的添加："+ptv.x+","+ptv.y);
                 var ptGraphic = new Graphic(ptv, pSymbol);
                 map.graphics.add(ptGraphic);
             }
@@ -305,12 +306,12 @@ require([
                 console.log(message[0])
                 if(message[0]==1){
                     boatindex=3;
-                    addtoMap();
+                    addtoMap(144);
                 }else if(message[0]==2||message[0]==3||message[0]==4){
                     map.graphics.clear();
                     boatindex=2;
                   // getshipmessage();
-                    addtoMap();
+                    addtoMap(144);
                 }
             } else {
                 map.graphics.clear();
@@ -342,21 +343,24 @@ require([
             pictureGraphic.add(picture);
             map.addLayer(pictureGraphic);
             for(var j =0;j<distance.length;j++){
-                var x0=(90-lat)-(90-distance[j].winddir);
+                var x0=Math.abs(lat)-Math.abs(distance[j].winddir);
+                var y0=Math.abs(lon)-Math.abs(distance[j].windspeed);
+                longdistance = Math.sqrt(Math.pow(x0,2)+Math.pow(y0,2));
+                console.log("longdistance"+longdistance.toFixed(0));
+                if(longdistance.toFixed(0)<=areas &&i!=2){
+               /* var x0=(90-lat)-(90-distance[j].winddir);
                 var y0=lon-distance[j].windspeed;
-                //C = sin(MLatA)*sin(MLatB)*cos(MLonA-MLonB) + cos(MLatA)*cos(MLatB)
-                //C = sin(LatA)*sin(LatB) + cos(LatA)*cos(LatB)*cos(MLonA-MLonB)
-                // Distance = R*Arccos(C)*Pi/180
-               // var C = Math.sin((90-lat))*Math.sin(lon)*Math.cos(y0) + Math.cos(lat)*Math.cos((90-distance[j].winddir));
+                    //C = sin(MLatA)*sin(MLatB)*cos(MLonA-MLonB) + cos(MLatA)*cos(MLatB)
+                    //C = sin(LatA)*sin(LatB) + cos(LatA)*cos(LatB)*cos(MLonA-MLonB)
+                    // Distance = R*Arccos(C)*Pi/180
+                    // var C = Math.sin((90-lat))*Math.sin(lon)*Math.cos(y0) + Math.cos(lat)*Math.cos((90-distance[j].winddir));
                 var C = Math.sin(lat)*Math.sin(distance[j].winddir)+Math.cos(lat)*Math.cos(distance[j].winddir)*Math.cos(lon-distance[j].windspeed);
-                longdistance = R*Math.acos(C)*Math.PI*1.5/180;
-                console.log("longdistance"+longdistance);
-                if(longdistance.toFixed(0)<=areas){
+                longdistance = R*Math.acos(C)*Math.PI*1.5/180;*/
                     popWarwindow(p);
                 }else{
                     popwindow(p);
                 }
-            }
+              }
             //注册点击的graphics事件
             dojo.connect(pictureGraphic, "onClick", function(){
                 //显示船载观测数据窗体
@@ -369,7 +373,7 @@ require([
                 $(".titlePane").css("background-color","#1E90FF!important");
                  map.infoWindow.setTitle("船的位置及编号");
                  map.infoWindow.setContent("位置坐标："+ p.x+","+ p.y+"<br>"+
-                     "船的编号"+evt[i].shipid+", "+"预警半径："+areas);
+                     "船的编号"+evt[i].shipid+", "+"预警半径："+areas+"千米");
                 map.infoWindow.show(p,map.getInfoWindowAnchor(p));
                 map.setCursor("pointer");
              });
@@ -388,7 +392,7 @@ require([
                     "<br>"+"航速:"+shipspeed+"km/h"+"<br>航向: "+shipdir+"<br>" +
                         "大风预警：距离3级大风还有100海里，预计当前船速3分钟内到达风圈<br>" +
                     "大浪预警：距离7级大浪还有"+Math.abs(longdistance).toFixed(4)+"海里，预警当前航速"+(Math.abs(longdistance)/20).toFixed(2)+"时到达浪圈<br>" +
-                    "当前航速下的预警半径："+areas
+                    "当前航速下的预警半径："+areas+"千米"
             );
             map.infoWindow.show(p,map.getInfoWindowAnchor(p));
         }
@@ -401,7 +405,7 @@ require([
                     "坐标点 : " + p.x.toFixed(2) + ", " + p.y.toFixed(2) +
                     "<br>"+"航速: "+shipspeed+"km/h"+"<br>航向:"+shipdir+"<br>" +
                     "大风大浪预警：当前无预警信息，未达风圈预警值，预警当前航速20km<br>" +
-                    "当前航速下的预警半径："+areas
+                    "当前航速下的预警半径："+areas+"千米"
             );
             map.infoWindow.show(p,map.getInfoWindowAnchor(p));
         }
