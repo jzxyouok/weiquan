@@ -183,7 +183,7 @@ require([
         map.on("load",function(){
            // zoomstart=map.getScale();
             //显示24小时内所有风级大于7的点
-                addtoMap(142);
+                addtoMap(143);
             //测试风杆数据的显示
           /* var  pictureMarker = createPictureSymbol('/img/wind4.jpg', 0, 12, 30, 40);
             var pt = new esri.geometry.Point(120,30,sr);
@@ -341,20 +341,21 @@ require([
                 console.log(message[0])
                 if(message[0]==1){
                     boatindex=3;
-                    addtoMap(144);
+                    addtoMap(143);
                 }else if(message[0]==2||message[0]==3||message[0]==4){
                     map.graphics.clear();
                     boatindex=2;
                   // getshipmessage();
-                    addtoMap(144);
+                    addtoMap(143);
                 }
             } else {
                 map.graphics.clear();
             }
             console.log("message"+message);
         }
+
         //增加船体图片的方法
-        function addGraphics(evt,i,distance){
+        function addGraphics(evt,i,data){
             graLayer.clear();
             pictureGraphic.clear();
             //东海区域的计算公式 东晋取正值，北纬取90-维度
@@ -374,28 +375,11 @@ require([
             map.addLayer(graLayer);
             //船体
             var  symMarker = createPictureSymbol('/img/boat1.png', 0, 12, 30, 45);
-            var picture = new Graphic(p, symMarker, null)
+            var picture = new Graphic(p, symMarker, null);
             pictureGraphic.add(picture);
             map.addLayer(pictureGraphic);
-            for(var j =0;j<distance.length;j++){
-                var x0=Math.abs(lat)-Math.abs(distance[j].winddir);
-                var y0=Math.abs(lon)-Math.abs(distance[j].windspeed);
-                longdistance = Math.sqrt(Math.pow(x0,2)+Math.pow(y0,2));
-                console.log("longdistance"+longdistance.toFixed(0));
-                if(longdistance.toFixed(0)<=areas &&i!=2){
-               /* var x0=(90-lat)-(90-distance[j].winddir);
-                var y0=lon-distance[j].windspeed;
-                    //C = sin(MLatA)*sin(MLatB)*cos(MLonA-MLonB) + cos(MLatA)*cos(MLatB)
-                    //C = sin(LatA)*sin(LatB) + cos(LatA)*cos(LatB)*cos(MLonA-MLonB)
-                    // Distance = R*Arccos(C)*Pi/180
-                    // var C = Math.sin((90-lat))*Math.sin(lon)*Math.cos(y0) + Math.cos(lat)*Math.cos((90-distance[j].winddir));
-                var C = Math.sin(lat)*Math.sin(distance[j].winddir)+Math.cos(lat)*Math.cos(distance[j].winddir)*Math.cos(lon-distance[j].windspeed);
-                longdistance = R*Math.acos(C)*Math.PI*1.5/180;*/
-                    popWarwindow(p);
-                }else{
-                    popwindow(p);
-                }
-              }
+            measureDistance(data,0);
+          //  console.log("distances"+distances);
             //注册点击的graphics事件
             dojo.connect(pictureGraphic, "onClick", function(){
                 //显示船载观测数据窗体
@@ -416,8 +400,34 @@ require([
                 map.setCursor("default");
             });
         };
-
-        function popWarwindow(p){
+        function measureDistance(data,j){
+            var point = new Point(data[j].winddir,data[j].windspeed ,sr);
+            inputPoints.push(p);
+            inputPoints.push(point);
+            if (inputPoints.length == 2) {
+                var distParams = new DistanceParameters();
+                distParams.distanceUnit = GeometryService.UNIT_KILOMETER;
+                distParams.geometry1 = inputPoints[inputPoints.length - 2];
+                distParams.geometry2 = inputPoints[inputPoints.length - 1];
+                distParams.geodesic = true;
+                geometryService.distance(distParams,function(distance){
+                    console.log("distance:"+distance);
+                    if(distance>areas){
+                        inputPoints=[];
+                        j++;
+                        console.log(j);
+                        measureDistance(data,j);
+                        if(j==data.length-1){
+                            popwindow(p);
+                            return;
+                        }
+                    }else{
+                        popWarwindow(p);return;
+                    }
+                });
+            }
+        };
+       function popWarwindow(p){
             //气泡
             $(".titlePane").css("background-color","#AF2811!important");
             map.infoWindow.resize(250,200);
