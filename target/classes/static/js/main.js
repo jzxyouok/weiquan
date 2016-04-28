@@ -71,7 +71,7 @@ require([
        "esri/symbols/Font", "esri/symbols/TextSymbol","esri/tasks/GeometryService", "esri/tasks/DistanceParameters",
         "esri/TimeExtent", "esri/dijit/TimeSlider",
         "dojo/_base/array","esri/geometry/geometryEngine", "esri/symbols/SimpleMarkerSymbol",
-        "esri/symbols/SimpleFillSymbol","esri/tasks/query",
+        "esri/symbols/SimpleFillSymbol","esri/tasks/query","esri/SpatialReference",
         "dojo/dom-geometry","dojo/window","dojo/has","esri/geometry/Polygon",
         "dojo/on",
         "dojo/dom",
@@ -85,7 +85,7 @@ require([
              Color,
              Circle,
              Graphic,Point,Popup,InfoTemplate,Draw,lang,Font,TextSymbol,GeometryService,DistanceParameters,
-             TimeExtent, TimeSlider, arrayUtils,geometryEngine,SimpleMarkerSymbol,SimpleFillSymbol, Query,
+             TimeExtent, TimeSlider, arrayUtils,geometryEngine,SimpleMarkerSymbol,SimpleFillSymbol, Query,SpatialReference,
              domGeom,win,has,Polygon,
              on,dom
         ) {
@@ -202,20 +202,55 @@ require([
                     console.log("data is get success",data);
                     //添加所有点的数据
                     addpointToMap(data);
+                    //画polygon
+                    createPolygon(data);
                 },
                 error:function(data){
                     console.log(data);
                 }
             });
         }
+        //画polygon
+        function createPolygon(data){
+            var polySymbolRed = new esri.symbol.SimpleFillSymbol(
+                esri.symbol.SimpleLineSymbol.STYLE_SOLID,
+                new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID,
+                    new Color([0, 0, 0, 0]), 1),
+                new Color([255, 0, 0, 0.2])
+            );
+
+             var polygon = new Polygon(new SpatialReference({wkid:4326}));
+             var ring = new Array();var pts,pts2;
+            var result = new Array();
+            for(var i=0;i<data.length-1;i++){
+                if(i==0||i==data.length-1){
+                    pts = new Point(data[i].winddir,data[i].windspeed,sr);
+                    ring.push(pts);
+                }
+                if(data[i].windspeed!=data[i+1].windspeed){
+                    pts2 = new Point(data[i+1].winddir,data[i+1].windspeed,sr);
+                    ring.push(pts2);
+                    pts = new Point(data[i].winddir,data[i].windspeed,sr);
+                    result.push(pts);
+                }
+            }
+            for(var j=result.length-1;j>0;j--){
+                console.log("result is "+result[j]);
+
+                ring.push(result[j]);
+            }
+            console.log("ring are"+ring);
+            polygon.addRing(ring);
+            var gra = new esri.Graphic(polygon,polySymbolRed);
+            map.graphics.add(gra);
+        }
         //点的添加
         function addpointToMap(data){
-            console.log("addd");
             for(var i =0;i<data.length;i++){
                 var ptv = new esri.geometry.Point(data[i].winddir,data[i].windspeed,sr);
                 console.log("点的添加："+ptv.x+","+ptv.y);
                 var ptGraphic = new Graphic(ptv, pSymbol);
-                map.graphics.add(ptGraphic);
+              //  map.graphics.add(ptGraphic);
             }
             //增加船体图片这个data是全部的点
             getshipmessage(data);
@@ -330,7 +365,7 @@ require([
             p = new esri.geometry.Point(lon,lat,sr);
             console.log("船体的点",p);
             //添加一个半径当前点
-            areas = shipspeed*24;
+            areas = shipspeed*10;
             console.log("areas"+areas);
             // 圆,半径为areas
             var buffer = geometryEngine.geodesicBuffer(p,areas , "kilometers");
