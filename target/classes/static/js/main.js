@@ -378,8 +378,34 @@ require([
             var picture = new Graphic(p, symMarker, null);
             pictureGraphic.add(picture);
             map.addLayer(pictureGraphic);
-            measureDistance(data,0);
-          //  console.log("distances"+distances);
+            //计算预警距离
+           // measureDistance(data,0);
+            for(var i=0;i<data.length-1;i++){
+                var point = new Point(data[i].winddir,data[i].windspeed ,sr);
+                inputPoints.push(p);
+                inputPoints.push(point);
+                var polyline = {
+                    "paths":[[[inputPoints[inputPoints.length - 2].x,inputPoints[inputPoints.length - 2].y],[inputPoints[inputPoints.length - 1].x,inputPoints[inputPoints.length - 1].y]]],
+                    "spatialReference":{"wkid":4326}
+                };
+                console.log(JSON.stringify(polyline));
+                polyline = new esri.geometry.Polyline(polyline);
+                console.log(esri.geometry.geodesicLengths([polyline], esri.Units.KILOMETERS));
+                var dis = esri.geometry.geodesicLengths([polyline], esri.Units.KILOMETERS);
+                if(dis<areas){
+                    popWarwindow(p);return;
+                }else{
+                    popwindow(p);
+                }
+                inputPoints=[];
+            }
+           /* var polyline = {
+                "paths":[[[121.20, 20.4], [129, 34.5]]],
+                "spatialReference":{"wkid":4326}
+            };
+            polyline = new esri.geometry.Polyline(polyline);
+            console.log(esri.geometry.geodesicLengths([polyline], esri.Units.KILOMETERS));*/
+
             //注册点击的graphics事件
             dojo.connect(pictureGraphic, "onClick", function(){
                 //显示船载观测数据窗体

@@ -34,8 +34,8 @@
       <file leaf-file-name="main.js" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/resources/static/js/main.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.31906614" vertical-offset="10136" max-vertical-offset="36450">
-              <caret line="412" column="40" selection-start-line="412" selection-start-column="32" selection-end-line="412" selection-end-column="40" />
+            <state vertical-scroll-proportion="0.80544746" vertical-offset="10536" max-vertical-offset="36950">
+              <caret line="438" column="48" selection-start-line="438" selection-start-column="48" selection-end-line="438" selection-end-column="48" />
               <folding />
             </state>
           </provider>
@@ -733,12 +733,12 @@
       <workItem from="1461632925622" duration="232000" />
       <workItem from="1461633236565" duration="15876000" />
       <workItem from="1461719509699" duration="26497000" />
-      <workItem from="1461805076315" duration="12006000" />
+      <workItem from="1461805076315" duration="14251000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="751137000" />
+    <option name="totallyTimeSpent" value="753382000" />
   </component>
   <component name="TodoView" selected-index="0">
     <todo-panel id="selected-file">
@@ -761,7 +761,7 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1382" height="744" extended-state="1" />
+    <frame x="-8" y="-8" width="1382" height="744" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
@@ -1170,8 +1170,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/resources/static/js/main.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.31906614" vertical-offset="10136" max-vertical-offset="36450">
-          <caret line="412" column="40" selection-start-line="412" selection-start-column="32" selection-end-line="412" selection-end-column="40" />
+        <state vertical-scroll-proportion="0.80544746" vertical-offset="10536" max-vertical-offset="36950">
+          <caret line="438" column="48" selection-start-line="438" selection-start-column="48" selection-end-line="438" selection-end-column="48" />
           <folding />
         </state>
       </provider>
